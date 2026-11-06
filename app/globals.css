@@ -1182,8 +1182,12 @@ a.site-footer__text:focus-visible {
 }
 
 .experience__title {
-  width: calc(707.036 * var(--u));
-  margin: calc(10.2 * var(--u)) auto 0;
+  /* background-clip: text only paints inside the box, so it's grown below
+     and to the sides (cancelled by margin; content width stays 707.036)
+     to keep descenders and edge glyphs from being clipped. */
+  width: calc(707.036 * var(--u) + 0.6em);
+  padding: 0 0.3em 0.3em;
+  margin: calc(10.2 * var(--u)) auto -0.3em;
   font-family: var(--font-display);
   font-weight: 400;
   /* Same size as the hero headline (.display), incl. its mobile step. */
