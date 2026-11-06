@@ -465,6 +465,13 @@ ul {
   width: 100%;
   z-index: 1;
   opacity: 0;
+  /* Must line up with bg-shot as it fades away on top of it. The inherited
+     .threshold__bg scale (1.04) made it ~4% too big. Measured (pixel-SSD
+     grid search, frame 0 vs bg-first-shot.webp): the video needs 1.005×
+     relative to the webp, no x offset — so bg-shot's scale(1) × 1.005,
+     plus bg-shot's same 0.833% vertical nudge. */
+  scale: 1.005;
+  translate: 0 0.833%;
 }
 
 @media (prefers-reduced-motion: reduce) {
