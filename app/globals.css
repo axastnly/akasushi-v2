@@ -385,8 +385,11 @@ ul {
      auto-stacked sibling, hiding bg--main's fade-out completely behind
      an already-opaque layer — reads as an instant cut, not a fade. */
   z-index: 2;
-  scale: 1.012;
-  translate: 0 1.11%;
+  /* Re-measured against bg.mp4's last frame (the one bg-shot is revealed
+     under): 1.005× relative to the webp, no x/y offset of its own — so
+     bg-shot's scale(1) × 1.005 plus bg-shot's same 0.833% nudge. */
+  scale: 1.005;
+  translate: 0 0.833%;
 }
 .threshold__bg-shot {
   z-index: 1;
