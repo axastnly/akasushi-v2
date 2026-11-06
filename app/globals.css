@@ -333,10 +333,12 @@ ul {
   }
 }
 /* ── Scene 00 · Threshold ─────────────────────────────────────────────── */
+/* No z-index on purpose: its children stack directly in .scene__pin's
+   context, so the doors (4) can sit above the hero copy (3) — the UI is
+   "inside" and revealed as the doors open. */
 .threshold {
   position: absolute;
   inset: 0;
-  z-index: 1;
 }
 .threshold__bg,
 .threshold__bg-shot,
@@ -405,11 +407,11 @@ ul {
   width: calc(50% + 1px);
 }
 .threshold__door {
-  z-index: 2;
+  z-index: 4;
 }
 .threshold__handle,
 .threshold__handle-base {
-  z-index: 3;
+  z-index: 4;
   pointer-events: none;
 }
 .threshold__door--left,

@@ -387,24 +387,24 @@ export default function ThresholdScene() {
             doorOpenStart,
           )
           .to(bg, { scale: 1, duration: doorOpenDuration, ease: "power2.inOut" }, doorOpenStart)
-          .fromTo(
-            lines,
-            { opacity: 0, y: 28 },
-            { opacity: 1, y: 0, duration: 0.5 * PACE, stagger: 0.12 * PACE, ease: "power2.out" },
-            doorOpenStart + 0.7 * PACE,
-          );
-
-        if (ctaGroup) {
-          seq.fromTo(
-            ctaGroup,
-            { opacity: 0, y: 28 },
-            { opacity: 1, y: 0, duration: 0.5 * PACE, ease: "power2.out" },
-            doorOpenStart + 0.7 * PACE + 0.12 * PACE * lines.length,
-          );
-        }
+          // The hero UI is already "inside" the room: it sits under the doors
+          // (see z-index in globals.css) and is simply revealed as they open,
+          // no separate fade-in.
+          .set([...lines, ctaGroup].filter(Boolean) as HTMLElement[], { opacity: 1, y: 0 }, doorOpenStart);
 
         if (chrome) {
-          seq.to(chrome, { autoAlpha: 1, duration: 0.5 * PACE }, doorOpenStart + 0.7 * PACE);
+          // .chrome is position: fixed above the whole scene, so it can't be
+          // stacked under the doors — clip it to the gap between them instead,
+          // same ease/duration as the doors' own xPercent ±101 (each door is
+          // ~50.5vw of travel, hence -0.5% at the end).
+          seq
+            .set(chrome, { autoAlpha: 1, clipPath: "inset(0% 50% 0% 50%)" }, doorOpenStart)
+            .to(
+              chrome,
+              { clipPath: "inset(0% -0.5% 0% -0.5%)", duration: doorOpenDuration, ease: "power2.inOut" },
+              doorOpenStart,
+            )
+            .set(chrome, { clearProps: "clipPath" }, doorOpenStart + doorOpenDuration);
         }
       });
 
