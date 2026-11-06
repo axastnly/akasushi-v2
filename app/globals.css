@@ -558,20 +558,28 @@ ul {
 .title-card__title-line {
   display: block;
 }
+/* The mask only covers the element's own box, so the box is grown on every
+   side but the top (padding, cancelled by negative margin — layout unchanged;
+   no top so stacked lines' vertical margins can't collapse) to take in
+   italic overhangs, descenders and the text-shadow glow. The gradient runs
+   on a 1.1× scale so at --reveal: 100 it is fully opaque edge to edge
+   instead of still fading out the last few percent. */
 [data-reveal] {
   --reveal: 0;
+  padding: 0 0.4em 0.35em;
+  margin: 0 -0.4em -0.35em;
   -webkit-mask-image: linear-gradient(
     to right,
     black 0%,
-    black calc(var(--reveal) * 1% - 6%),
-    transparent calc(var(--reveal) * 1% + 2%),
+    black calc(var(--reveal) * 1.1% - 6%),
+    transparent calc(var(--reveal) * 1.1% + 2%),
     transparent 100%
   );
   mask-image: linear-gradient(
     to right,
     black 0%,
-    black calc(var(--reveal) * 1% - 6%),
-    transparent calc(var(--reveal) * 1% + 2%),
+    black calc(var(--reveal) * 1.1% - 6%),
+    transparent calc(var(--reveal) * 1.1% + 2%),
     transparent 100%
   );
 }
