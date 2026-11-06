@@ -51,6 +51,23 @@ const BG_SHOT_FADE_FRACTION = 0.03;
 // guarantees wipeCanvas is still on frame 0 — matching bgShot — no matter
 // how fast that fade gets scrolled through.
 const PACE = 1.4;
+// Hero copy ("A Taste Of Japan" + buttons) fades out in lockstep with
+// bg-wipe.mp4's own fade to black. Normalised frame brightness (1 = full,
+// 0 = black) measured from the file for frames 47..75 of its 76 frames —
+// before 47 the copy is fully visible, after 75 it's gone.
+const WIPE_FADE_FIRST_FRAME = 47;
+const WIPE_FADE_CURVE = [
+  1, 1, 0.98, 0.95, 0.9, 0.85, 0.78, 0.73, 0.68, 0.62, 0.58, 0.54, 0.49, 0.43, 0.39, 0.33, 0.27, 0.23, 0.19,
+  0.15, 0.12, 0.09, 0.07, 0.05, 0.03, 0.02, 0.01, 0, 0,
+];
+const WIPE_FRAME_COUNT = 76;
+function wipeBrightness(progress: number) {
+  const i = progress * (WIPE_FRAME_COUNT - 1) - WIPE_FADE_FIRST_FRAME;
+  if (i <= 0) return 1;
+  if (i >= WIPE_FADE_CURVE.length - 1) return 0;
+  const lo = Math.floor(i);
+  return WIPE_FADE_CURVE[lo] + (WIPE_FADE_CURVE[lo + 1] - WIPE_FADE_CURVE[lo]) * (i - lo);
+}
 
 /* Frame-rate-independent exponential lerp — smooths the discrete frame
    picks WebCodecs scrubbing produces (same reasoning as the AVIF
@@ -251,6 +268,7 @@ export default function ThresholdScene() {
           );
           smoothedWipeProgress = smoothProgress(smoothedWipeProgress, wipeProgress);
           wipePlayer?.seekToProgress(smoothedWipeProgress);
+          if (copy) gsap.set(copy, { autoAlpha: wipeBrightness(smoothedWipeProgress) });
 
           if (bgShot) {
             const shotFadeProgress = gsap.utils.clamp(0, 1, rawProgress / BG_SHOT_FADE_FRACTION);
