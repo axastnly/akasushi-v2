@@ -3,6 +3,7 @@
 import { useEffect } from "react";
 import Chrome from "@/components/Chrome";
 import ThresholdScene from "@/components/ThresholdScene";
+import ExperienceSection from "@/components/ExperienceSection";
 import ReserveModalProvider from "@/components/ReserveModalProvider";
 import { startSmoothScroll, refreshWhenSettled, trackScrollState } from "@/lib/motion";
 
@@ -59,6 +60,7 @@ export default function Home() {
       <Chrome />
       <main>
         <ThresholdScene />
+        <ExperienceSection />
       </main>
     </ReserveModalProvider>
   );

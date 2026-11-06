@@ -1203,3 +1203,104 @@ a.site-footer__text:focus-visible {
     height: 122%;
   }
 }
+
+/* ── "Step Into AKA" experience section (Figma 656:538) ──────────────────
+   Sits in normal flow directly after the finale pin. --u = one Figma px at
+   the 1512px design width, so every value below is the design's own number. */
+.experience {
+  --u: calc(100vw / 1512);
+  position: relative;
+  background: #000;
+  padding: calc(158 * var(--u)) 0 calc(158.33 * var(--u));
+  text-align: center;
+}
+
+.experience__eyebrow {
+  margin: 0;
+  font-family: var(--font-ui);
+  font-weight: 700;
+  font-size: calc(18 * var(--u));
+  line-height: 1.1;
+  letter-spacing: calc(5.4 * var(--u));
+  text-transform: uppercase;
+  color: #ce9c6d;
+}
+
+.experience__title {
+  width: calc(707.036 * var(--u));
+  margin: calc(10.2 * var(--u)) auto 0;
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: calc(80 * var(--u));
+  line-height: 1.2;
+  text-wrap: balance;
+  color: transparent;
+  background-image: linear-gradient(143.45deg, #f5f4f4 0%, #e7d5cb 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  /* text-shadow would paint over background-clip:text fill, so the design's
+     13.969px 0 36.319px glow is a drop-shadow (blur arg = std-dev = radius/2). */
+  filter: drop-shadow(calc(13.969 * var(--u)) 0 calc(18.16 * var(--u)) rgba(255, 255, 255, 0.15));
+}
+
+.experience__grid {
+  display: flex;
+  justify-content: center;
+  gap: calc(120 * var(--u));
+  margin-top: calc(190.61 * var(--u));
+  text-align: left;
+}
+
+.experience__col {
+  display: flex;
+  flex-direction: column;
+  gap: calc(100 * var(--u));
+  width: calc(555.749 * var(--u));
+}
+
+.experience__col--right {
+  padding-top: calc(281.25 * var(--u));
+}
+
+.experience__card {
+  position: relative;
+  height: calc(620.89 * var(--u));
+}
+
+.experience__media {
+  position: relative;
+  height: calc(536.89 * var(--u));
+  overflow: hidden;
+}
+
+.experience__media img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.experience__overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.experience__label {
+  position: absolute;
+  top: calc(496.89 * var(--u));
+  left: calc(41 * var(--u));
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: calc(56 * var(--u));
+  line-height: 1.1;
+  text-transform: capitalize;
+  white-space: nowrap;
+  color: #fff;
+  text-shadow: calc(13.969 * var(--u)) 0 calc(36.319 * var(--u)) rgba(255, 255, 255, 0.13);
+}
+
+.experience__col--right .experience__label {
+  left: calc(36 * var(--u));
+}
