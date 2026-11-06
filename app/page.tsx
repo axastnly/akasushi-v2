@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import Chrome from "@/components/Chrome";
 import ThresholdScene from "@/components/ThresholdScene";
 import ExperienceSection from "@/components/ExperienceSection";
+import Footer from "@/components/Footer";
 import ReserveModalProvider from "@/components/ReserveModalProvider";
 import { startSmoothScroll, refreshWhenSettled, trackScrollState } from "@/lib/motion";
 
@@ -54,7 +55,7 @@ export default function Home() {
 
   return (
     <ReserveModalProvider>
-      <a className="skip-link" href="#site-footer">
+      <a className="skip-link" href="#experience">
         Skip the intro
       </a>
       <Chrome />
@@ -62,6 +63,7 @@ export default function Home() {
         <ThresholdScene />
         <ExperienceSection />
       </main>
+      <Footer />
     </ReserveModalProvider>
   );
 }

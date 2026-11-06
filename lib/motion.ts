@@ -24,13 +24,12 @@ export const MOTION_OK = "(prefers-reduced-motion: no-preference)";
 export const MOTION_REDUCED = "(prefers-reduced-motion: reduce)";
 
 let activeLenis: Lenis | null = null;
-// The footer lives inside the pinned threshold scene now (see
-// ThresholdScene.tsx), so its on-page position only exists at the end of
-// that scene's GSAP-driven scroll-jacked timeline — a plain anchor jump
-// (native, or Lenis's own `anchors` handling) resolves against normal
-// static layout and would land near the top of the pin instead. Anything
-// that needs to "skip to the footer" has to scroll the real scroller
-// (Lenis) to that ScrollTrigger's own `end` pixel value instead.
+// Content after the pinned threshold scene (the experience section) only
+// reaches its real on-page position at the end of that scene's GSAP-driven
+// scroll-jacked timeline — a plain anchor jump (native, or Lenis's own
+// `anchors` handling) resolves against static layout and lands near the
+// top of the pin instead. Anything that needs to skip past the intro has
+// to scroll the real scroller (Lenis) to that ScrollTrigger's `end` value.
 export function getLenis(): Lenis | null {
   return activeLenis;
 }

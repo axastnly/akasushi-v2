@@ -13,7 +13,6 @@ import {
 import { WebCodecsPlayer } from "@/lib/webcodecsPlayer";
 import { asset } from "@/lib/paths";
 import Button from "./Button";
-import Footer from "./Footer";
 import { useReserveModal } from "./ReserveModalProvider";
 
 /* Ported from the Vite site's scene-00-threshold.js — same four-phase
@@ -53,18 +52,6 @@ const BG_SHOT_FADE_FRACTION = 0.03;
 // how fast that fade gets scrolled through.
 const FINALE_DIM_START = 0.92;
 const FINALE_DIM_MAX = 35;
-// The footer lives inside the pinned stage itself (not after it in normal
-// flow — a trailing, overlapping footer there needs at least one full
-// viewport of scrollable content after the pin to ever let it release,
-// which an overlapping/shortened footer can't guarantee). It's revealed
-// as an overlay over the still-full-frame, still-fixed finale canvas
-// during this last stretch of finale progress, then both settle into a
-// normal static block together once the pin naturally unpins. Synced to
-// start exactly with FINALE_DIM_START, not independently — the footer
-// should only appear once the dim gradient is already rising, i.e. the
-// last (1 - FINALE_DIM_START) fraction of finale.mp4's own duration
-// (0.92 → the last ~1.1s of its trimmed ~14.3s length).
-const FOOTER_REVEAL_START = FINALE_DIM_START;
 const PACE = 1.4;
 
 /* Frame-rate-independent exponential lerp — smooths the discrete frame
@@ -106,7 +93,6 @@ export default function ThresholdScene() {
   const titleLine2Ref = useRef<HTMLSpanElement>(null);
   const finaleCanvasRef = useRef<HTMLCanvasElement>(null);
   const finaleDimRef = useRef<HTMLDivElement>(null);
-  const footerOverlayRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     ensureGsapRegistered();
@@ -162,7 +148,6 @@ export default function ThresholdScene() {
     ) as HTMLElement[];
     const finaleCanvas = finaleCanvasRef.current;
     const finaleDim = finaleDimRef.current;
-    const footerOverlay = footerOverlayRef.current;
     const chrome = document.querySelector(".chrome");
 
     // wipePlayer/finalePlayer fetch their whole source file up front
@@ -313,18 +298,6 @@ export default function ThresholdScene() {
                 gsap.set(finaleDim, { "--dim": dimProgress * FINALE_DIM_MAX });
               }
 
-              if (footerOverlay) {
-                const footerReveal = gsap.utils.clamp(
-                  0,
-                  1,
-                  (finaleProgress - FOOTER_REVEAL_START) / (1 - FOOTER_REVEAL_START),
-                );
-                gsap.set(footerOverlay, {
-                  opacity: footerReveal,
-                  y: (1 - footerReveal) * 40,
-                  pointerEvents: footerReveal > 0.5 ? "auto" : "none",
-                });
-              }
             }
           }
         },
@@ -332,10 +305,10 @@ export default function ThresholdScene() {
 
       bg.addEventListener("ended", maybeStartPhase2, { once: true });
 
-      // The footer's real on-page position only exists at the end of this
-      // pin's scroll-jacked timeline — see the comment on getLenis() for
-      // why a plain anchor jump can't reach it. Scroll the real scroller
-      // there directly instead.
+      // "Skip the intro" lands on the experience section, which starts exactly
+      // where this pin's scroll-jacked timeline ends — a plain anchor jump
+      // would resolve against static layout instead, so scroll the real
+      // scroller (Lenis) to the pin's end directly.
       const skipLink = document.querySelector(".skip-link");
       const onSkip = (e: Event) => {
         e.preventDefault();
@@ -344,12 +317,6 @@ export default function ThresholdScene() {
         // own — unlock first or the jump below is silently swallowed.
         getLenis()?.start();
         getLenis()?.scrollTo(st.end, { immediate: true });
-        // The footer's reveal is normally gated on phase1Done inside
-        // onUpdate — if this is clicked before the intro naturally
-        // finishes (the whole point of a skip link), that gate would
-        // never have opened yet, leaving the footer at the right scroll
-        // position but still invisible. Force it directly instead.
-        if (footerOverlay) gsap.set(footerOverlay, { opacity: 1, y: 0, pointerEvents: "auto" });
       };
       skipLink?.addEventListener("click", onSkip);
 
@@ -482,7 +449,6 @@ export default function ThresholdScene() {
         if (wipeCanvas) gsap.set(wipeCanvas, { clearProps: "all" });
         if (finaleCanvas) gsap.set(finaleCanvas, { clearProps: "all" });
         if (finaleDim) gsap.set(finaleDim, { clearProps: "all" });
-        if (footerOverlay) gsap.set(footerOverlay, { clearProps: "all" });
         gsap.set([copy, lines, ctaGroup, bg, doorLeft, doorRight].filter(Boolean) as HTMLElement[], { clearProps: "all" });
         if (bgShot) gsap.set(bgShot, { clearProps: "all" });
         if (chrome) gsap.set(chrome, { clearProps: "all" });
@@ -684,10 +650,6 @@ export default function ThresholdScene() {
 
         <canvas ref={finaleCanvasRef} className="finale__canvas" aria-hidden="true" />
         <div className="finale__dim" ref={finaleDimRef} aria-hidden="true" />
-
-        <div className="finale__footer-overlay" ref={footerOverlayRef}>
-          <Footer />
-        </div>
       </div>
     </section>
   );
