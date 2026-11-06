@@ -598,25 +598,11 @@ ul {
      decoration. */
   pointer-events: none;
 }
-.finale__dim {
-  position: absolute;
-  inset: 0;
-  z-index: 7;
-  pointer-events: none;
-  --dim: 0;
-  background: linear-gradient(
-    to top,
-    rgb(0 0 0 / 1) 0%,
-    rgb(0 0 0 / 1) calc(var(--dim) * 0.5%),
-    rgb(0 0 0 / 0) calc(var(--dim) * 1%)
-  );
-}
 @media (prefers-reduced-motion: reduce) {
   .title-card {
     display: none;
   }
-  .finale__canvas,
-  .finale__dim {
+  .finale__canvas {
     display: none;
   }
 }
@@ -1180,7 +1166,7 @@ a.site-footer__text:focus-visible {
   --u: calc(100vw / 1512);
   position: relative;
   background: #000;
-  padding: calc(158 * var(--u)) 0 calc(158.33 * var(--u));
+  padding: calc(60 * var(--u)) 0 calc(158.33 * var(--u));
   text-align: center;
 }
 

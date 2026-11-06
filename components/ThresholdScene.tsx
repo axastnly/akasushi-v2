@@ -50,8 +50,6 @@ const BG_SHOT_FADE_FRACTION = 0.03;
 // reveal). Holding wipeProgress at 0 until bgShot's fade is done
 // guarantees wipeCanvas is still on frame 0 — matching bgShot — no matter
 // how fast that fade gets scrolled through.
-const FINALE_DIM_START = 0.92;
-const FINALE_DIM_MAX = 35;
 const PACE = 1.4;
 
 /* Frame-rate-independent exponential lerp — smooths the discrete frame
@@ -90,7 +88,6 @@ export default function ThresholdScene() {
   const titleLine1Ref = useRef<HTMLSpanElement>(null);
   const titleLine2Ref = useRef<HTMLSpanElement>(null);
   const finaleCanvasRef = useRef<HTMLCanvasElement>(null);
-  const finaleDimRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     ensureGsapRegistered();
@@ -143,7 +140,6 @@ export default function ThresholdScene() {
       Boolean,
     ) as HTMLElement[];
     const finaleCanvas = finaleCanvasRef.current;
-    const finaleDim = finaleDimRef.current;
     const chrome = document.querySelector(".chrome");
 
     // wipePlayer/finalePlayer fetch their whole source file up front
@@ -278,11 +274,6 @@ export default function ThresholdScene() {
               const finaleProgress = gsap.utils.clamp(0, 1, finaleRaw);
               smoothedFinaleProgress = smoothProgress(smoothedFinaleProgress, finaleProgress);
               finalePlayer.seekToProgress(smoothedFinaleProgress);
-
-              if (finaleDim) {
-                const dimProgress = gsap.utils.clamp(0, 1, (finaleProgress - FINALE_DIM_START) / (1 - FINALE_DIM_START));
-                gsap.set(finaleDim, { "--dim": dimProgress * FINALE_DIM_MAX });
-              }
 
             }
           }
@@ -434,7 +425,6 @@ export default function ThresholdScene() {
         finalePlayer?.destroy();
         if (wipeCanvas) gsap.set(wipeCanvas, { clearProps: "all" });
         if (finaleCanvas) gsap.set(finaleCanvas, { clearProps: "all" });
-        if (finaleDim) gsap.set(finaleDim, { clearProps: "all" });
         gsap.set([copy, lines, ctaGroup, bg, doorLeft, doorRight].filter(Boolean) as HTMLElement[], { clearProps: "all" });
         if (bgShot) gsap.set(bgShot, { clearProps: "all" });
         if (chrome) gsap.set(chrome, { clearProps: "all" });
@@ -613,7 +603,6 @@ export default function ThresholdScene() {
         </div>
 
         <canvas ref={finaleCanvasRef} className="finale__canvas" aria-hidden="true" />
-        <div className="finale__dim" ref={finaleDimRef} aria-hidden="true" />
       </div>
     </section>
   );
