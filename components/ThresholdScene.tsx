@@ -22,9 +22,18 @@ import { useReserveModal } from "./ReserveModalProvider";
    scrub WebCodecsPlayer instances instead of seeking <video> elements or
    drawing pre-extracted AVIF frames — see lib/webcodecsPlayer.ts. */
 
-const PIN_LENGTH = "+=650%";
-const WIPE_FRACTION = 0.28;
-const TITLE_FRACTION = 0.22;
+// Phase lengths in viewport-heights of scroll. Wipe and title card are
+// unchanged from the original site (0.28 / 0.22 of +=650%). The finale was
+// 325vh for the original 25.08s clip; finale-*.mp4 is now trimmed to end on
+// its pitch-black frame (~14.3s), so its share shrinks proportionally
+// (325 × 14.33 / 25.08 ≈ 186vh) to keep the same scroll-per-second scrub feel.
+const WIPE_VH = 182;
+const TITLE_VH = 143;
+const FINALE_VH = 186;
+const TOTAL_VH = WIPE_VH + TITLE_VH + FINALE_VH;
+const PIN_LENGTH = `+=${TOTAL_VH}%`;
+const WIPE_FRACTION = WIPE_VH / TOTAL_VH;
+const TITLE_FRACTION = TITLE_VH / TOTAL_VH;
 // bg--main -> bgShot (the webp) is a fixed-duration fade with scroll
 // completely locked (see lenis.stop()/start() in the effect below) — not
 // scroll-driven, because there's nothing to drive it with: no scroll
@@ -54,7 +63,7 @@ const FINALE_DIM_MAX = 35;
 // start exactly with FINALE_DIM_START, not independently — the footer
 // should only appear once the dim gradient is already rising, i.e. the
 // last (1 - FINALE_DIM_START) fraction of finale.mp4's own duration
-// (0.92 → the last ~2s of its 25.08s length).
+// (0.92 → the last ~1.1s of its trimmed ~14.3s length).
 const FOOTER_REVEAL_START = FINALE_DIM_START;
 const PACE = 1.4;
 
@@ -157,7 +166,7 @@ export default function ThresholdScene() {
     const chrome = document.querySelector(".chrome");
 
     // wipePlayer/finalePlayer fetch their whole source file up front
-    // (2.2MB, and ~6.5MB/~4.2MB for finale desktop/mobile) — starting that
+    // (2.2MB, and ~4.5MB/~2.4MB for the trimmed finale desktop/mobile) — starting that
     // immediately would compete for bandwidth with bg.mp4 right as it
     // needs to buffer enough to play the intro smoothly. Neither is
     // needed until well past phase 1, so their .load() calls are deferred
