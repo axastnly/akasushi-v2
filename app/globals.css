@@ -1,0 +1,1205 @@
+/* ── Design tokens ────────────────────────────────────────────────────── */
+:root {
+  --black: #000000;
+  --gold: #b58a4a;
+  --red: #8c151b;
+  --ivory: #ede6da;
+  --ivory-dim: rgb(237 230 218 / 0.62);
+  --ivory-faint: rgb(237 230 218 / 0.28);
+  --gold-glow: rgb(181 138 74 / 0.45);
+
+  --font-display: "IvyPresto Headline", "Iowan Old Style", Palatino, Georgia, serif;
+  --font-ui: "TT Drugs", ui-sans-serif, -apple-system, "Helvetica Neue", Arial, sans-serif;
+
+  --step-display: clamp(1.75rem, 1.15rem + 3.1vw, 4rem);
+  --step-ui: clamp(0.7rem, 0.66rem + 0.2vw, 0.8rem);
+
+  --gutter: clamp(1.1rem, 0.6rem + 2.2vw, 3rem);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+
+  --ease-out: cubic-bezier(0.22, 0.61, 0.36, 1);
+  --dur: 0.6s;
+
+  --z-scene: 1;
+  --z-chrome: 50;
+
+  color-scheme: dark;
+}
+
+/* ── Brand typefaces (self-hosted) ───────────────────────────────────── */
+/* URLs here are hardcoded with the /akasushi-v2 basePath (see lib/paths.ts)
+   since CSS has no way to reference next.config.ts's basePath at build
+   time — keep these two in sync if the basePath ever changes. */
+@font-face {
+  font-family: "IvyPresto Headline";
+  src: url("/akasushi-v2/assets/fonts/IvyPrestoHeadline-Regular.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "TT Drugs";
+  src: url("/akasushi-v2/assets/fonts/TTDrugs-Regular.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "TT Drugs";
+  src: url("/akasushi-v2/assets/fonts/TTDrugs-Bold.woff2") format("woff2");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* ── Reset + page shell ───────────────────────────────────────────────── */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: auto;
+  -webkit-text-size-adjust: 100%;
+  background: var(--black);
+}
+
+body {
+  margin: 0;
+  background: var(--black);
+  color: var(--ivory);
+  font-family: var(--font-ui);
+  font-weight: 300;
+  overflow-x: clip;
+  -webkit-font-smoothing: antialiased;
+}
+
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+.lenis.lenis-stopped,
+.lenis.lenis-stopped body {
+  overflow: hidden;
+}
+
+img {
+  display: block;
+  max-width: 100%;
+}
+a {
+  color: inherit;
+  text-decoration: none;
+}
+p,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  margin: 0;
+}
+ol,
+ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+::selection {
+  background: var(--gold);
+  color: var(--black);
+}
+:focus-visible {
+  outline: 1px solid var(--gold);
+  outline-offset: 4px;
+}
+
+.skip-link {
+  position: fixed;
+  top: 0;
+  left: 50%;
+  translate: -50% -150%;
+  z-index: 100;
+  padding: 0.7em 1.4em;
+  background: var(--black);
+  border: 1px solid var(--gold);
+  font-size: var(--step-ui);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  transition: translate 0.3s var(--ease-out);
+}
+.skip-link:focus-visible {
+  translate: -50% 0;
+}
+
+/* ── Chrome: brand + reserve CTA ──────────────────────────────────────────
+   Structure/positioning taken from the parallel Next.js build's Navbar
+   (fixed, gradient fade-to-transparent, 1400px container, logo + one CTA
+   — no placeholder nav-link list, which that build doesn't have either
+   since none of those links went anywhere). Imagery is still ours. */
+.chrome {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: var(--z-chrome);
+  background: linear-gradient(to bottom, rgb(0 0 0 / 0.5) 0%, rgb(0 0 0 / 0) 100%);
+  pointer-events: none;
+  opacity: 0;
+  visibility: hidden;
+}
+/* For pages without ThresholdScene's own GSAP autoAlpha reveal (see
+   Chrome.tsx's alwaysVisible prop) — the prefers-reduced-motion block
+   further down has its own .chrome.is-visible rule too, scoped to that
+   media query; this is the unscoped version other pages need. */
+.chrome.is-visible {
+  opacity: 1;
+  visibility: visible;
+}
+.chrome__container {
+  padding: 1.7rem 2.5rem;
+  padding-top: max(1.7rem, env(safe-area-inset-top, 0px));
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+@media (max-width: 47.99em) {
+  .chrome__container {
+    padding: 1.2rem;
+    padding-top: max(1.2rem, env(safe-area-inset-top, 0px));
+  }
+}
+.chrome > * {
+  pointer-events: auto;
+}
+.brand {
+  display: flex;
+  align-items: center;
+}
+.brand__logo {
+  height: 60px;
+  width: auto;
+  object-fit: contain;
+}
+@media (max-width: 47.99em) {
+  .brand__logo {
+    height: 58px;
+  }
+}
+
+/* ── Button (primary/secondary) ───────────────────────────────────────────
+   Ported from the parallel build's Button component — same variants,
+   same sizing — using this project's own font tokens instead of its
+   next/font variable names. */
+.btn {
+  appearance: none;
+  font-family: var(--font-ui);
+  font-size: 0.8125rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  padding: 1.18em 1.3em 1em 1.3em;
+  border-radius: 1px;
+  cursor: pointer;
+  outline: none;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+  transition: all 1s cubic-bezier(0.16, 1, 0.3, 1);
+  border: 1px solid transparent;
+  min-width: 9.5em;
+}
+.btn:active {
+  transform: translateY(0);
+}
+.btn:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 3px;
+}
+.btn--primary {
+  background: linear-gradient(to right, #fff, #e5e5e5);
+  color: #000;
+}
+.btn--primary:hover,
+.btn--primary:focus-visible {
+  background: linear-gradient(to right, #fff, #fff);
+  border-color: #fff;
+  box-shadow: 0 0 30px rgb(255 255 255 / 0.3);
+}
+.btn--secondary {
+  background: rgb(255 255 255 / 0.1);
+  backdrop-filter: blur(25px);
+  -webkit-backdrop-filter: blur(25px);
+  color: #fff;
+  border-color: rgb(255 255 255 / 0.02);
+}
+.btn--secondary:hover,
+.btn--secondary:focus-visible {
+  background: rgb(255 255 255 / 0.18);
+  box-shadow: 0 4px 30px rgb(255 255 255 / 0.12);
+}
+@media (max-width: 47.99em) {
+  .btn {
+    font-size: 0.82rem;
+    letter-spacing: 0.12em;
+  }
+}
+
+/* ── Shared scene shell ───────────────────────────────────────────────── */
+.scene {
+  position: relative;
+  z-index: var(--z-scene);
+}
+.scene__pin {
+  position: relative;
+  height: 100vh;
+  height: 100svh;
+  overflow: hidden;
+  display: grid;
+  grid-template-areas: "stage";
+  place-items: end center;
+  isolation: isolate;
+}
+.scene__pin > * {
+  grid-area: stage;
+}
+/* Mirrors the parallel build's HeroSection .container/.content/.headline/
+   .buttonGroup exactly — same max-widths, padding, gaps, type scale,
+   letter-spacing, text-shadow, and the 768px breakpoint's overrides.
+   Only the font-family token differs (--font-display vs their
+   --font-ivy-presto), both resolving to the same IvyPresto Headline. */
+.scene__copy {
+  position: relative;
+  z-index: 3;
+  width: 100%;
+  max-width: 1400px;
+  margin-inline: auto;
+  padding: 0 2.5rem 3.5rem;
+  display: flex;
+  justify-content: center;
+}
+.scene__copy-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.75rem;
+  max-width: 800px;
+}
+.scene__cta-group {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1.25rem;
+  flex-wrap: wrap;
+}
+@media (max-width: 47.99em) {
+  .scene__copy {
+    padding: 0 1.25rem 4rem;
+  }
+  .scene__copy-content {
+    gap: 1.5rem;
+  }
+  .scene__cta-group {
+    width: 100%;
+    gap: 0.75rem;
+  }
+}
+.display {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: clamp(3rem, 4vw, 4.25rem);
+  line-height: 1.12;
+  letter-spacing: -0.015em;
+  color: #fff;
+  text-align: center;
+  text-shadow: 0 4px 30px rgb(0 0 0 / 0.6);
+}
+.display__line {
+  display: block;
+}
+@media (max-width: 47.99em) {
+  .display {
+    font-size: clamp(1.85rem, 9.8vw, 2.75rem);
+    line-height: 1.15;
+    margin-bottom: 0.15em;
+  }
+}
+/* ── Scene 00 · Threshold ─────────────────────────────────────────────── */
+.threshold {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+}
+.threshold__bg,
+.threshold__bg-shot,
+.threshold__door,
+.threshold__handle,
+.threshold__handle-base {
+  position: absolute;
+  top: 0;
+  height: 100%;
+  width: 100%;
+  object-fit: cover;
+  will-change: transform;
+  backface-visibility: hidden;
+}
+.threshold__bg,
+.threshold__bg-shot {
+  left: 0;
+  object-position: center;
+}
+.threshold__bg {
+  scale: 1.04;
+}
+/* bg--main (the phase-1 intro clip, bg.mp4) needs to line up with
+   bg-first-shot.webp, since bg-shot is revealed underneath it as it
+   fades out — any mismatch reads as the image "jumping" at the handoff.
+   bg.mp4 has been re-shot/re-exported multiple times since this was
+   first calibrated, each one a different take with its own framing, so
+   this is NOT a one-time fix — re-measure whenever the footage changes.
+   Measured via direct simulation (not eyeballed): rendered bg-shot at
+   its own fixed translate (0.833%, scale 1) as the target, then searched
+   scale+translate combinations for bg--main minimizing pixel SSD against
+   it (brute-force grid search, refined in narrowing passes) — a plain
+   offset search alone (no scale) couldn't get a good match, confirming
+   this take is also a slightly different framing/crop, not just shifted.
+   Both `translate` (not object-position, viewport-independent) and
+   `scale` override the inherited .threshold__bg scale (1.04, tuned for
+   a now-superseded take) since they're calibrated as a pair against
+   bg-shot's own fixed values, not usable independently. */
+.threshold__bg--main {
+  /* Needs to sit above bg-shot (z-index: 1) during the phase-1 handoff:
+     bg-shot now jumps straight to full opacity (no fade-in of its own)
+     and bg--main is what fades out on top of it. If bg--main had no
+     z-index, bg-shot's explicit z-index would still place it above an
+     auto-stacked sibling, hiding bg--main's fade-out completely behind
+     an already-opaque layer — reads as an instant cut, not a fade. */
+  z-index: 2;
+  scale: 1.012;
+  translate: 0 1.11%;
+}
+.threshold__bg-shot {
+  z-index: 1;
+  pointer-events: none;
+  scale: 1;
+  /* bg-first-shot.webp is what's actually visible the instant bgWipe
+     hard-cuts in (gsap.set(..., {delay}) — not a fade), so IT'S the
+     element whose alignment against bg-wipe.mp4 actually matters for the
+     perceived cut, not bg--main's (which has already faded out by then).
+     Measured separately from bg--main's offset, same cross-correlation
+     method: -6px of 720 = 0.833%, smaller than bg--main's because this
+     bridge image apparently was never perfectly matched to begin with. */
+  translate: 0 0.833%;
+}
+.threshold__door,
+.threshold__handle,
+.threshold__handle-base {
+  width: calc(50% + 1px);
+}
+.threshold__door {
+  z-index: 2;
+}
+.threshold__handle,
+.threshold__handle-base {
+  z-index: 3;
+  pointer-events: none;
+}
+.threshold__door--left,
+.threshold__handle--left,
+.threshold__handle-base--left {
+  left: 0;
+  object-position: right center;
+  transform-origin: left center;
+}
+.threshold__door--right,
+.threshold__handle--right,
+.threshold__handle-base--right {
+  right: 0;
+  object-position: left center;
+  transform-origin: right center;
+}
+.threshold__handle {
+  --fill: 0;
+  -webkit-mask-image: linear-gradient(
+    to top,
+    black 0%,
+    black calc(var(--fill) * 1% - 4%),
+    transparent calc(var(--fill) * 1% + 2%),
+    transparent 100%
+  );
+  mask-image: linear-gradient(
+    to top,
+    black 0%,
+    black calc(var(--fill) * 1% - 4%),
+    transparent calc(var(--fill) * 1% + 2%),
+    transparent 100%
+  );
+}
+.scene--threshold .scene__copy,
+.scene--threshold .display__line,
+.scene--threshold .scene__cta-group {
+  opacity: 0;
+}
+.threshold__bg,
+.threshold__bg-shot,
+.threshold__door {
+  opacity: 0;
+}
+
+/* Wipe sequence canvas (phase 2) — same role bg-wipe.mp4 used to play,
+   now scrubbed by drawing pre-decoded WebCodecs frames (see
+   lib/webcodecsPlayer.js) instead of seeking a <video>. */
+.threshold__bg--wipe-canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 100%;
+  z-index: 1;
+  opacity: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .threshold__bg {
+    scale: 1;
+  }
+  .threshold__door--left,
+  .threshold__handle--left {
+    transform: translateX(-100%);
+  }
+  .threshold__door--right,
+  .threshold__handle--right {
+    transform: translateX(100%);
+  }
+  .threshold__handle {
+    opacity: 0;
+  }
+  .scene--threshold .scene__copy,
+  .scene--threshold .display__line,
+  .threshold__bg,
+  .threshold__door {
+    opacity: 0;
+    transition: opacity 0.8s var(--ease-out);
+  }
+  .scene--threshold.is-visible .scene__copy,
+  .scene--threshold.is-visible .display__line,
+  .scene--threshold.is-visible .threshold__bg--main,
+  .scene--threshold.is-visible .threshold__door {
+    opacity: 1;
+  }
+  .chrome {
+    transition: opacity 0.8s var(--ease-out);
+  }
+  .chrome.is-visible {
+    opacity: 1;
+    visibility: visible;
+  }
+}
+
+/* ── Title card (phase 3) ────────────────────────────────────────────── */
+.title-card {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  overflow: hidden;
+  opacity: 0;
+  pointer-events: none;
+}
+.title-card__world {
+  position: absolute;
+  inset: 0;
+}
+.title-card__gradient {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 18% 88%, #1f0000 0%, #000000 77%);
+}
+.title-card__trees,
+.title-card__birds {
+  position: absolute;
+  height: auto;
+  filter: blur(0px) brightness(1);
+}
+.title-card__trees {
+  left: 0;
+  bottom: 0;
+  width: clamp(240px, 34vw, 500px);
+}
+.title-card__birds {
+  right: 0;
+  top: 0;
+  width: clamp(170px, 24vw, 360px);
+  transform-origin: left center;
+}
+.title-card__vignette {
+  position: absolute;
+  inset: 0;
+  background: #000;
+  opacity: 0;
+  pointer-events: none;
+}
+.title-card__copy {
+  position: relative;
+  z-index: 1;
+  height: 100%;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: 0.6em;
+  text-align: center;
+  padding: 0 var(--gutter);
+}
+.title-card__eyebrow {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-weight: 300;
+  font-size: clamp(1.1rem, 0.9rem + 1vw, 1.6rem);
+  color: rgb(237 230 218 / 0.75);
+}
+.title-card__title {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: clamp(2.4rem, 1.6rem + 4.5vw, 5rem);
+  line-height: 1.12;
+  color: var(--ivory);
+  text-shadow: 0 2px 28px rgb(11 11 11 / 0.6);
+}
+.title-card__title-line {
+  display: block;
+}
+[data-reveal] {
+  --reveal: 0;
+  -webkit-mask-image: linear-gradient(
+    to right,
+    black 0%,
+    black calc(var(--reveal) * 1% - 6%),
+    transparent calc(var(--reveal) * 1% + 2%),
+    transparent 100%
+  );
+  mask-image: linear-gradient(
+    to right,
+    black 0%,
+    black calc(var(--reveal) * 1% - 6%),
+    transparent calc(var(--reveal) * 1% + 2%),
+    transparent 100%
+  );
+}
+
+/* ── Finale sequence (phase 4) ───────────────────────────────────────── */
+.finale__canvas {
+  position: absolute;
+  inset: 0;
+  z-index: 6;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  /* Same reasoning as .finale__footer-overlay just above: sits above the
+     hero CTA group in the same stacked grid cell and would otherwise
+     intercept its clicks even while fully transparent. Nothing ever
+     needs pointer events on this canvas — it's aria-hidden decoration. */
+  pointer-events: none;
+}
+.finale__dim {
+  position: absolute;
+  inset: 0;
+  z-index: 7;
+  pointer-events: none;
+  --dim: 0;
+  background: linear-gradient(
+    to top,
+    rgb(0 0 0 / 1) 0%,
+    rgb(0 0 0 / 1) calc(var(--dim) * 0.5%),
+    rgb(0 0 0 / 0) calc(var(--dim) * 1%)
+  );
+}
+/* Lives inside the pinned stage, overlaid on the still-full-frame finale
+   canvas during the last stretch of its scroll progress — see
+   FOOTER_REVEAL_START in ThresholdScene.tsx. Revealed by JS (opacity/y),
+   so it needs an explicit reduced-motion override below: without scroll-
+   driven reveal logic running, it would otherwise stay invisible and the
+   footer would be unreachable for reduced-motion users. */
+.finale__footer-overlay {
+  position: relative;
+  z-index: 20;
+  width: 100%;
+  opacity: 0;
+  /* Without this, the invisible overlay still sits on top of the hero
+     Reserve/View Menu buttons (same stacked grid cell, higher z-index)
+     and eats their clicks from page load until scroll reaches the
+     finale phase, where ThresholdScene's onUpdate switches this to
+     "auto" once revealed (and onSkip forces it on directly). */
+  pointer-events: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .title-card {
+    display: none;
+  }
+  .finale__canvas,
+  .finale__dim {
+    display: none;
+  }
+  .finale__footer-overlay {
+    opacity: 1;
+    pointer-events: auto;
+  }
+}
+
+/* ── Footer ───────────────────────────────────────────────────────────────
+   Ported from Figma (AKA Design, node 627:1206 "Footer - Laptop") — pixel
+   values taken directly from the node metadata, not approximated:
+   container max-width 1250px, padding-top 100px / padding-inline 40px,
+   an 80px gap between the column row and the bottom bar, ZERO gap at the
+   row level itself (the three columns are exactly 389px each with a
+   1.5px separator between — 389×3 + 1.5×2 = 1170, the row's full width,
+   confirmed from the node positions), and a 25px gap for everything
+   stacked inside one column (heading → text → icons). Colors stay the
+   design's own white-on-black, not this site's --ivory tokens, since
+   that's what's actually specified. The row collapsing to a stacked
+   column below 48em is this project's own responsive adaptation — the
+   source file only has a laptop-width frame, no mobile spec to match. */
+.site-footer {
+  position: relative;
+  z-index: 20;
+  max-width: 1250px;
+  margin-inline: auto;
+  padding: 100px 40px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 80px;
+}
+@media (max-width: 47.99em) {
+  .site-footer {
+    padding: clamp(3rem, 2rem + 5vh, 6.25rem) clamp(1.25rem, 0.5rem + 3vw, 2.5rem) 0;
+    gap: 3rem;
+  }
+}
+.site-footer__columns {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2.5rem;
+  text-align: center;
+}
+@media (min-width: 48em) {
+  .site-footer__columns {
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 0;
+  }
+}
+.site-footer__col {
+  display: grid;
+  justify-items: center;
+  gap: 25px;
+  flex: 1 0 0;
+  min-width: 0;
+}
+.site-footer__separator {
+  display: none;
+}
+@media (min-width: 48em) {
+  .site-footer__separator {
+    display: block;
+    flex-shrink: 0;
+    align-self: center;
+    width: 1.5px;
+    height: 136px;
+    background: rgb(255 255 255 / 0.1);
+  }
+}
+.site-footer__heading {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: 1.3125rem;
+  letter-spacing: 0.013em;
+  line-height: 1.1;
+  text-transform: capitalize;
+  color: #fff;
+}
+.site-footer__text {
+  font-family: var(--font-ui);
+  font-size: 0.875rem;
+  line-height: 1.3;
+  color: rgb(255 255 255 / 0.7);
+  display: grid;
+  gap: 0.2em;
+}
+.site-footer__text a {
+  color: inherit;
+  text-decoration: none;
+}
+a.site-footer__text {
+  transition: color var(--dur) var(--ease-out);
+}
+a.site-footer__text:hover,
+a.site-footer__text:focus-visible {
+  color: var(--gold);
+}
+.site-footer__social {
+  display: flex;
+  gap: 1.5625rem;
+  align-items: center;
+  justify-content: center;
+}
+.site-footer__social a {
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  opacity: 0.85;
+  transition: opacity var(--dur) var(--ease-out);
+}
+.site-footer__social a:hover,
+.site-footer__social a:focus-visible {
+  opacity: 1;
+}
+.site-footer__bottom {
+  width: 100%;
+  border-top: 1.5px solid rgb(255 255 255 / 0.1);
+  display: grid;
+  place-items: center;
+  min-height: 70px;
+  padding-bottom: var(--safe-bottom);
+  font-family: var(--font-ui);
+  font-size: 0.875rem;
+  color: rgb(255 255 255 / 0.7);
+}
+
+/* ── Reserve modal ────────────────────────────────────────────────────
+   Ported from Figma (AKA Design, node 627:3580). Colors here are the
+   design's own exact values (gold #ce9c6d, card #0d0d0d, borders
+   #161515) rather than this site's --gold/--black tokens — close but
+   not identical, and fidelity to the design wins for this component. */
+.reserve-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--gutter);
+  background: rgb(0 0 0 / 0.5);
+  backdrop-filter: blur(35px);
+  -webkit-backdrop-filter: blur(35px);
+}
+.reserve-modal {
+  position: relative;
+  width: min(420px, 100%);
+  max-height: 100%;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2.5rem;
+  padding: 3.125rem 2.1875rem 2.1875rem;
+  border-radius: 20px;
+  border: 1px solid #161515;
+  background: linear-gradient(-40deg, rgb(0 0 0 / 0.8) 0%, #000 100%);
+}
+.reserve-modal__close {
+  position: absolute;
+  top: 17px;
+  right: 17px;
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+.reserve-modal__header {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9375rem;
+  width: 100%;
+  text-align: center;
+}
+.reserve-modal__eyebrow {
+  margin: 0;
+  font-family: var(--font-ui);
+  font-weight: 700;
+  font-size: 0.8125rem;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: #ce9c6d;
+}
+.reserve-modal__title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: 2.4375rem;
+  line-height: 1.1;
+  color: #fff;
+  text-transform: capitalize;
+  text-wrap: balance;
+}
+.reserve-modal__options {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9375rem;
+  width: 100%;
+}
+.reserve-modal__option {
+  display: flex;
+  align-items: center;
+  gap: 1.5625rem;
+  width: 100%;
+  border-radius: 9px;
+  border: 1px solid #161515;
+  background: #0d0d0d;
+  overflow: hidden;
+  text-decoration: none;
+  transition: border-color var(--dur) var(--ease-out);
+}
+.reserve-modal__option:hover,
+.reserve-modal__option:focus-visible {
+  border-color: #ce9c6d;
+}
+.reserve-modal__option-icon {
+  flex-shrink: 0;
+  width: 90px;
+  height: 90px;
+}
+.reserve-modal__option-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4375rem;
+  flex: 1;
+  min-width: 0;
+  padding-right: 1rem;
+}
+.reserve-modal__option-title {
+  font-family: var(--font-ui);
+  font-weight: 700;
+  font-size: 1rem;
+  line-height: 1.3;
+  color: #fff;
+}
+.reserve-modal__option-subtitle {
+  font-family: var(--font-ui);
+  font-weight: 400;
+  font-size: 0.875rem;
+  line-height: 1.1;
+  color: rgb(255 255 255 / 0.7);
+}
+.reserve-modal__footer {
+  margin: 0;
+  font-family: var(--font-ui);
+  font-size: 0.875rem;
+  line-height: 1.1;
+  color: #333;
+  text-align: center;
+  text-wrap: balance;
+}
+@media (max-width: 47.99em) {
+  .reserve-modal {
+    gap: 2rem;
+    padding: 2.5rem 1.5rem 1.75rem;
+  }
+  .reserve-modal__title {
+    font-size: 1.9rem;
+  }
+  .reserve-modal__option-icon {
+    width: 70px;
+    height: 70px;
+  }
+}
+
+/* ── Menu page ────────────────────────────────────────────────────────
+   Ported from Figma (AKA Design, node 878:733 "Vertical Menu") — its own
+   code layer's CSS, kept as close to verbatim as possible. Two
+   deliberate departures from the source: font-family swapped from the
+   design's Georgia/Helvetica placeholders to this project's
+   --font-display/--font-ui tokens, and the design's own header +
+   reservation-dialog rules are dropped entirely (the page uses the
+   site's existing .chrome navbar and .reserve-modal instead — see
+   app/menu/page.tsx). Colors, spacing, sizes, and breakpoints (including
+   the design's own px-based 900px/640px breakpoints, not this site's
+   usual 47.99em one) are all unchanged from the source.
+   font-weight: 400 on .menu-page overrides this site's body default of
+   300 — the design assumed an unstyled browser default (400) for any
+   text that doesn't set its own weight; without this override, TT Drugs
+   at 300 would read lighter here than the design intended. */
+.menu-page {
+  min-height: 100dvh;
+  overflow: clip;
+  background: #000;
+  color: #fff;
+  font-weight: 400;
+}
+
+.menu-layout {
+  display: grid;
+  width: min(100% - 6.7vw, 1398px);
+  margin: 20px auto 0;
+  grid-template-columns: 294px minmax(0, 1076px);
+  gap: 28px;
+}
+
+.category-selector {
+  position: sticky;
+  top: 165px;
+  display: flex;
+  height: max-content;
+  flex-direction: column;
+  gap: 18px;
+  padding: 28px 0;
+}
+
+.category-tab {
+  width: 100%;
+  overflow: hidden;
+  padding: 7px 12px;
+  border: 0;
+  border-left: 2px solid transparent;
+  color: rgb(255 255 255 / 70%);
+  background: transparent;
+  font-family: var(--font-ui);
+  font-size: 17px;
+  line-height: normal;
+  text-align: left;
+  white-space: nowrap;
+  transition:
+    color 160ms ease,
+    border-color 160ms ease,
+    transform 160ms ease;
+}
+.category-tab:hover {
+  color: #fff;
+  transform: translateX(4px);
+}
+.category-tab--active {
+  border-left-color: #fff;
+  color: #fff;
+  font-weight: 700;
+}
+.category-tab:focus-visible {
+  outline: 2px solid #dd443c;
+  outline-offset: 4px;
+}
+
+.menu-content {
+  min-width: 0;
+  scroll-margin-top: 145px;
+}
+.menu-content > h1 {
+  margin: 19px 28px 7px;
+  font-family: var(--font-display);
+  font-size: 48px;
+  font-weight: 400;
+  letter-spacing: -0.96px;
+  line-height: normal;
+}
+
+.sections {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.menu-section {
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+  padding: 28px;
+  scroll-margin-top: 155px;
+}
+.menu-section > h2 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 32px;
+  font-weight: 400;
+  line-height: 1.1;
+}
+
+.dish-hero {
+  position: relative;
+  height: 452px;
+  overflow: hidden;
+  border-radius: 5px;
+  box-shadow: 0 20px 250px -30px rgb(143 34 11 / 40%);
+}
+.dish-hero__texture,
+.dish-hero__plate {
+  position: absolute;
+  max-width: none;
+  pointer-events: none;
+}
+.dish-hero__texture {
+  top: -187.48%;
+  left: 0;
+  width: 100%;
+  height: 360%;
+}
+.dish-hero__plate {
+  top: -41.21%;
+  left: -16.54%;
+  width: 116.52%;
+  height: 175.54%;
+}
+
+.menu-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  column-gap: 100px;
+  row-gap: 30px;
+}
+
+.menu-item {
+  display: flex;
+  min-height: 126px;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 30px 15px;
+  border-bottom: 1.5px solid rgb(255 255 255 / 10%);
+}
+.menu-item h3 {
+  margin: 0 0 15px;
+  font-family: var(--font-display);
+  font-size: 21px;
+  font-weight: 400;
+  letter-spacing: 0.21px;
+  line-height: 1.1;
+}
+.menu-item__group {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 0 0 16px;
+  color: #dd443c;
+  font-family: var(--font-ui);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 2.1px;
+  line-height: 1.3;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.menu-item__group::after {
+  width: 100%;
+  height: 1px;
+  content: "";
+  background: linear-gradient(90deg, rgb(221 68 60 / 65%), rgb(221 68 60 / 0%));
+}
+.menu-item:has(.menu-item__group) {
+  position: relative;
+  padding-top: 36px;
+}
+.menu-item:has(.menu-item__group) .menu-item__price {
+  margin-top: 30px;
+}
+.menu-item__details {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  color: rgb(255 255 255 / 70%);
+  font-family: var(--font-ui);
+  font-size: 14px;
+  line-height: 1.3;
+}
+.menu-item__details p,
+.menu-item__price {
+  margin: 0;
+}
+.menu-item__price {
+  flex: none;
+  color: #dd443c;
+  font-family: var(--font-display);
+  font-size: 17px;
+  letter-spacing: 0.34px;
+  line-height: 1.1;
+  white-space: nowrap;
+}
+
+@media (max-width: 900px) {
+  .menu-layout {
+    display: flex;
+    width: 100%;
+    margin: 0;
+    flex-direction: column;
+    gap: 0;
+  }
+  .category-selector {
+    z-index: 20;
+    top: 108px;
+    overflow-x: auto;
+    width: 100%;
+    flex-direction: row;
+    gap: 8px;
+    padding: 14px 24px;
+    background: rgb(0 0 0 / 92%);
+    scrollbar-width: none;
+  }
+  .category-selector::-webkit-scrollbar {
+    display: none;
+  }
+  .category-tab {
+    width: auto;
+    flex: none;
+    border-bottom: 1px solid transparent;
+    border-left: 0;
+    font-size: 14px;
+  }
+  .category-tab--active {
+    border-bottom-color: #fff;
+  }
+  .category-tab:hover {
+    transform: none;
+  }
+  .menu-content {
+    scroll-margin-top: 170px;
+  }
+  .menu-content > h1 {
+    margin: 28px 24px 12px;
+    font-size: 42px;
+  }
+  .menu-section {
+    gap: 28px;
+    padding: 24px;
+  }
+  .dish-hero {
+    height: clamp(260px, 52vw, 430px);
+  }
+  .menu-grid {
+    column-gap: 36px;
+  }
+}
+
+@media (max-width: 640px) {
+  .menu-grid {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+  .menu-item {
+    min-height: 0;
+    padding: 25px 4px;
+  }
+  .menu-item:has(.menu-item__group) {
+    padding-top: 32px;
+  }
+  .menu-section > h2 {
+    font-size: 28px;
+  }
+  .dish-hero {
+    height: 260px;
+  }
+  .dish-hero__texture {
+    top: -116%;
+    height: 260%;
+  }
+  .dish-hero__plate {
+    top: -8%;
+    left: -40%;
+    width: 180%;
+    height: 122%;
+  }
+}
