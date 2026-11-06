@@ -139,6 +139,7 @@ export default function ExperienceSection() {
 
   return (
     <section className="experience" id="experience" aria-labelledby="experience-title" ref={sectionRef}>
+      <p className="experience__eyebrow">Step Into AKA</p>
       <h2 className="experience__title" id="experience-title">
         An Experience Beyond the Ordinary
       </h2>

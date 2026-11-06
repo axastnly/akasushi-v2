@@ -1172,13 +1172,24 @@ a.site-footer__text:focus-visible {
   --u: calc(100vw / 1512);
   position: relative;
   background: #000;
-  padding: calc(188 * var(--u)) 0 calc(158.33 * var(--u));
+  padding: calc(158 * var(--u)) 0 calc(158.33 * var(--u));
   text-align: center;
+}
+
+.experience__eyebrow {
+  margin: 0;
+  font-family: var(--font-ui);
+  font-weight: 700;
+  font-size: calc(18 * var(--u));
+  line-height: 1.1;
+  letter-spacing: calc(5.4 * var(--u));
+  text-transform: uppercase;
+  color: #ce9c6d;
 }
 
 .experience__title {
   width: calc(707.036 * var(--u));
-  margin: 0 auto;
+  margin: calc(10.2 * var(--u)) auto 0;
   font-family: var(--font-display);
   font-weight: 400;
   /* Same size as the hero headline (.display), incl. its mobile step. */
