@@ -4,7 +4,7 @@ import { useEffect, useRef } from "react";
 import { asset } from "@/lib/paths";
 import { ensureGsapRegistered, gsap, MOTION_OK } from "@/lib/motion";
 
-/* "Step Into AKA" — section below the finale.
+/* Experience section below the finale.
    Ported from Figma AKA-Design, node 656:538 (1512 × 2792 frame).
    Every dimension is expressed in design pixels × --u (see globals.css),
    so the layout is exact at 1512px wide and scales proportionally.
@@ -139,7 +139,6 @@ export default function ExperienceSection() {
 
   return (
     <section className="experience" id="experience" aria-labelledby="experience-title" ref={sectionRef}>
-      <p className="experience__eyebrow">Step Into AKA</p>
       <h2 className="experience__title" id="experience-title">
         An Experience Beyond the Ordinary
       </h2>

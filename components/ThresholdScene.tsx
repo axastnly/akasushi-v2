@@ -85,8 +85,6 @@ export default function ThresholdScene() {
   const ctaGroupRef = useRef<HTMLDivElement>(null);
   const titleCardRef = useRef<HTMLDivElement>(null);
   const titleCardGradientRef = useRef<HTMLDivElement>(null);
-  const titleCardTreesRef = useRef<HTMLImageElement>(null);
-  const titleCardBirdsRef = useRef<HTMLImageElement>(null);
   const titleCardVignetteRef = useRef<HTMLDivElement>(null);
   const eyebrowRef = useRef<HTMLParagraphElement>(null);
   const titleLine1Ref = useRef<HTMLSpanElement>(null);
@@ -140,8 +138,6 @@ export default function ThresholdScene() {
     const ctaGroup = ctaGroupRef.current;
     const titleCard = titleCardRef.current;
     const titleCardGradient = titleCardGradientRef.current;
-    const titleCardTrees = titleCardTreesRef.current;
-    const titleCardBirds = titleCardBirdsRef.current;
     const titleCardVignette = titleCardVignetteRef.current;
     const titleCardReveals = [eyebrowRef.current, titleLine1Ref.current, titleLine2Ref.current].filter(
       Boolean,
@@ -194,16 +190,6 @@ export default function ThresholdScene() {
               .fromTo(titleCardReveals[2], { "--reveal": 0 }, { "--reveal": 100, duration: 0.55 }, 0.85)
               .addLabel("zoom", "+=0.8")
               .to(titleCardGradient, { scale: 2.3, duration: 1.7, ease: "expo.in" }, "zoom")
-              .to(
-                titleCardTrees,
-                { scale: 2.3, xPercent: -14, filter: "blur(7px) brightness(0.6)", duration: 1.7, ease: "expo.in" },
-                "zoom+=0.15",
-              )
-              .to(
-                titleCardBirds,
-                { scale: 2.3, xPercent: 32, filter: "blur(7px) brightness(0.6)", duration: 1.7, ease: "expo.in" },
-                "zoom+=0.5",
-              )
               .to(titleCardReveals[0], { "--reveal": 0, duration: 0.9, ease: "power1.in" }, "zoom")
               .to(titleCardReveals[1], { "--reveal": 0, duration: 0.9, ease: "power1.in" }, "zoom+=0.15")
               .to(titleCardReveals[2], { "--reveal": 0, duration: 0.9, ease: "power1.in" }, "zoom+=0.5")
@@ -458,8 +444,6 @@ export default function ThresholdScene() {
         if (handleBaseRight) gsap.set(handleBaseRight, { clearProps: "all" });
         if (titleCard) gsap.set(titleCard, { clearProps: "all" });
         if (titleCardGradient) gsap.set(titleCardGradient, { clearProps: "all" });
-        if (titleCardTrees) gsap.set(titleCardTrees, { clearProps: "all" });
-        if (titleCardBirds) gsap.set(titleCardBirds, { clearProps: "all" });
         if (titleCardVignette) gsap.set(titleCardVignette, { clearProps: "all" });
         if (titleCardReveals.length) gsap.set(titleCardReveals, { clearProps: "all" });
       };
@@ -611,26 +595,6 @@ export default function ThresholdScene() {
         <div className="title-card" ref={titleCardRef} aria-hidden="true">
           <div className="title-card__world">
             <div className="title-card__gradient" ref={titleCardGradientRef} />
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              ref={titleCardTreesRef}
-              className="title-card__trees"
-              src={asset("/assets/01-unknown/trees.webp")}
-              alt=""
-              width={567}
-              height={683}
-              decoding="async"
-            />
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              ref={titleCardBirdsRef}
-              className="title-card__birds"
-              src={asset("/assets/01-unknown/birds.webp")}
-              alt=""
-              width={533}
-              height={623}
-              decoding="async"
-            />
           </div>
           <div className="title-card__copy">
             <p className="title-card__eyebrow" data-reveal ref={eyebrowRef}>

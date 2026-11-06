@@ -522,23 +522,6 @@ ul {
   inset: 0;
   background: radial-gradient(circle at 18% 88%, #1f0000 0%, #000000 77%);
 }
-.title-card__trees,
-.title-card__birds {
-  position: absolute;
-  height: auto;
-  filter: blur(0px) brightness(1);
-}
-.title-card__trees {
-  left: 0;
-  bottom: 0;
-  width: clamp(240px, 34vw, 500px);
-}
-.title-card__birds {
-  right: 0;
-  top: 0;
-  width: clamp(170px, 24vw, 360px);
-  transform-origin: left center;
-}
 .title-card__vignette {
   position: absolute;
   inset: 0;
@@ -1182,34 +1165,24 @@ a.site-footer__text:focus-visible {
   }
 }
 
-/* ── "Step Into AKA" experience section (Figma 656:538) ──────────────────
+/* ── Experience section (Figma 656:538) ──────────────────
    Sits in normal flow directly after the finale pin. --u = one Figma px at
    the 1512px design width, so every value below is the design's own number. */
 .experience {
   --u: calc(100vw / 1512);
   position: relative;
   background: #000;
-  padding: calc(158 * var(--u)) 0 calc(158.33 * var(--u));
+  padding: calc(188 * var(--u)) 0 calc(158.33 * var(--u));
   text-align: center;
-}
-
-.experience__eyebrow {
-  margin: 0;
-  font-family: var(--font-ui);
-  font-weight: 700;
-  font-size: calc(18 * var(--u));
-  line-height: 1.1;
-  letter-spacing: calc(5.4 * var(--u));
-  text-transform: uppercase;
-  color: #ce9c6d;
 }
 
 .experience__title {
   width: calc(707.036 * var(--u));
-  margin: calc(10.2 * var(--u)) auto 0;
+  margin: 0 auto;
   font-family: var(--font-display);
   font-weight: 400;
-  font-size: calc(80 * var(--u));
+  /* Same size as the hero headline (.display), incl. its mobile step. */
+  font-size: clamp(3rem, 4vw, 4.25rem);
   line-height: 1.2;
   text-wrap: balance;
   color: transparent;
@@ -1277,6 +1250,12 @@ a.site-footer__text:focus-visible {
   white-space: nowrap;
   color: #fff;
   text-shadow: calc(13.969 * var(--u)) 0 calc(36.319 * var(--u)) rgba(255, 255, 255, 0.13);
+}
+
+@media (max-width: 47.99em) {
+  .experience__title {
+    font-size: clamp(1.85rem, 9.8vw, 2.75rem);
+  }
 }
 
 .experience__col--right .experience__label {
