@@ -177,6 +177,106 @@ ul {
 .chrome > * {
   pointer-events: auto;
 }
+/* Centre nav (Gallery / Menu / Contact Us). Absolutely centred so it sits
+   in the true middle regardless of logo vs Reserve widths. Collapses into
+   the .chrome__toggle menu button below 64em. */
+.chrome__container {
+  position: relative;
+}
+.chrome__nav {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  translate: -50% -50%;
+  display: flex;
+  align-items: center;
+  gap: 2.75rem;
+}
+.chrome__link {
+  font-family: var(--font-ui);
+  font-weight: 400;
+  font-size: 0.85rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: rgb(255 255 255 / 0.8);
+  text-decoration: none;
+  white-space: nowrap;
+  transition: color 0.2s ease;
+}
+.chrome__link:hover,
+.chrome__link:focus-visible,
+.chrome__link[aria-current="page"] {
+  color: var(--gold);
+}
+.chrome__actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+.chrome__toggle {
+  display: none;
+  appearance: none;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  position: relative;
+}
+.chrome__toggle span {
+  position: absolute;
+  left: 10px;
+  right: 10px;
+  height: 1.5px;
+  background: #fff;
+  transition: translate 0.25s ease, rotate 0.25s ease;
+}
+.chrome__toggle span:first-child {
+  top: 17px;
+}
+.chrome__toggle span:last-child {
+  top: 25px;
+}
+.chrome[data-open] .chrome__toggle span:first-child {
+  translate: 0 4px;
+  rotate: 45deg;
+}
+.chrome[data-open] .chrome__toggle span:last-child {
+  translate: 0 -4px;
+  rotate: -45deg;
+}
+.chrome__mobile-nav {
+  display: none;
+}
+@media (max-width: 63.99em) {
+  .chrome__nav {
+    display: none;
+  }
+  .chrome__toggle {
+    display: block;
+  }
+  .chrome[data-open] {
+    background: #000;
+  }
+  .chrome__mobile-nav:not([hidden]) {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.75rem;
+    padding: 1.5rem 1.2rem 2.5rem;
+    background: #000;
+    border-bottom: 1px solid rgb(255 255 255 / 0.12);
+  }
+  .chrome__mobile-nav .chrome__link {
+    font-family: var(--font-display);
+    font-size: 1.75rem;
+    letter-spacing: 0;
+    text-transform: none;
+    color: #fff;
+  }
+}
+
 .brand {
   display: flex;
   align-items: center;
@@ -1281,4 +1381,47 @@ a.site-footer__text:focus-visible {
 
 .experience__col--right .experience__label {
   left: calc(36 * var(--u));
+}
+
+/* ── Gallery page ────────────────────────────────────────────────────── */
+.gallery-page {
+  max-width: 1400px;
+  margin-inline: auto;
+  padding: clamp(8rem, 6rem + 6vw, 11rem) 2.5rem 0;
+}
+.gallery-page__title {
+  margin: 0 0 clamp(2.5rem, 2rem + 2vw, 4rem);
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: clamp(3rem, 4vw, 4.25rem);
+  line-height: 1.12;
+  text-align: center;
+  color: #fff;
+}
+.gallery-grid {
+  columns: 3;
+  column-gap: 1.25rem;
+}
+.gallery-grid__item {
+  display: block;
+  width: 100%;
+  height: auto;
+  margin-bottom: 1.25rem;
+  break-inside: avoid;
+}
+@media (max-width: 63.99em) {
+  .gallery-grid {
+    columns: 2;
+  }
+}
+@media (max-width: 47.99em) {
+  .gallery-page {
+    padding-inline: 1.2rem;
+  }
+  .gallery-grid {
+    columns: 1;
+  }
+  .gallery-page__title {
+    font-size: clamp(1.85rem, 9.8vw, 2.75rem);
+  }
 }

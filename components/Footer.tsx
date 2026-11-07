@@ -14,11 +14,11 @@ export default function Footer() {
           {/* eslint-disable-next-line react/jsx-no-target-blank */}
           <a
             className="site-footer__text"
-            href="https://www.google.com/maps/search/?api=1&query=AKA+Restaurant+%26+Lounge+Mileo+The+Palm+West+Beach+Palm+Jumeirah+Dubai"
+            href="https://maps.app.goo.gl/xYkv6dodUTRsCwKW6"
             target="_blank"
             rel="noopener"
           >
-            <p>AKA Restaurant &amp; Lounge</p>
+            <p>AKA Sushi Restaurant</p>
             <p>Mileo The Palm, West Beach, Palm Jumeirah</p>
             <p>Dubai, UAE</p>
           </a>
@@ -29,28 +29,31 @@ export default function Footer() {
         <div className="site-footer__col">
           <h3 className="site-footer__heading">Contact Us</h3>
           <p className="site-footer__text">
-            Phone: +971 50 1234 567
-            <br />
-            Email: reservations@aka-dubai.ae
+            <span>
+              Phone: <a href="tel:+971565004187">+971 56 500 4187</a>
+            </span>
+            <span>
+              Email: <a href="mailto:aka@akasushi.ae">aka@akasushi.ae</a>
+            </span>
           </p>
           <div className="site-footer__social" aria-label="Social links">
-            <a href="#" aria-label="Location">
+            <a href="https://maps.app.goo.gl/xYkv6dodUTRsCwKW6" target="_blank" rel="noopener noreferrer" aria-label="Location">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={asset("/assets/icons/map-pin.svg")} alt="" width={24} height={24} />
             </a>
-            <a href="#" aria-label="Email">
+            <a href="mailto:aka@akasushi.ae" aria-label="Email">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={asset("/assets/icons/mail.svg")} alt="" width={24} height={24} />
             </a>
-            <a href="#" aria-label="Instagram">
+            <a href="https://instagram.com/akasushi.ae" target="_blank" rel="noopener noreferrer" aria-label="Instagram">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={asset("/assets/icons/instagram.svg")} alt="" width={24} height={24} />
             </a>
-            <a href="#" aria-label="Phone">
+            <a href="tel:+971565004187" aria-label="Phone">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={asset("/assets/icons/phone.svg")} alt="" width={24} height={24} />
             </a>
-            <a href="#" aria-label="WhatsApp">
+            <a href="https://wa.me/971565004187" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={asset("/assets/icons/whatsapp.svg")} alt="" width={24} height={24} />
             </a>
@@ -62,9 +65,9 @@ export default function Footer() {
         <div className="site-footer__col">
           <h3 className="site-footer__heading">Hours</h3>
           <p className="site-footer__text">
-            Sunday – Thursday: 7:00 PM – 1:00 AM
+            Monday – Friday: 12:00 PM – 1:00 AM
             <br />
-            Friday &amp; Saturday: 7:00 PM – 2:00 AM
+            Saturday &amp; Sunday: 12:00 PM – 2:00 AM
           </p>
         </div>
       </div>

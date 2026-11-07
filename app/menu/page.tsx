@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import Chrome from "@/components/Chrome";
+import Footer from "@/components/Footer";
 import ReserveModalProvider from "@/components/ReserveModalProvider";
 import { asset } from "@/lib/paths";
 import { menuData, type MenuCategory } from "@/lib/menuData";
@@ -133,6 +134,7 @@ export default function MenuPage() {
           </div>
         </main>
       </div>
+      <Footer />
     </ReserveModalProvider>
   );
 }
