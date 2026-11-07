@@ -520,6 +520,15 @@ ul {
      bridge image apparently was never perfectly matched to begin with. */
   translate: 0 0.833%;
 }
+/* Top-most layer: above the header (--z-chrome: 50), below the skip link
+   (100) and the reserve modal (200). */
+.threshold-doors {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  overflow: hidden;
+  pointer-events: none;
+}
 .threshold__door,
 .threshold__handle,
 .threshold__handle-base {

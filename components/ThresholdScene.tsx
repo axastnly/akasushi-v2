@@ -88,12 +88,6 @@ export default function ThresholdScene() {
   const bgRef = useRef<HTMLVideoElement>(null);
   const bgShotRef = useRef<HTMLImageElement>(null);
   const wipeCanvasRef = useRef<HTMLCanvasElement>(null);
-  const doorLeftRef = useRef<HTMLImageElement>(null);
-  const doorRightRef = useRef<HTMLImageElement>(null);
-  const handleLeftRef = useRef<HTMLImageElement>(null);
-  const handleRightRef = useRef<HTMLImageElement>(null);
-  const handleBaseLeftRef = useRef<HTMLImageElement>(null);
-  const handleBaseRightRef = useRef<HTMLImageElement>(null);
   const copyRef = useRef<HTMLDivElement>(null);
   const line1Ref = useRef<HTMLSpanElement>(null);
   const line2Ref = useRef<HTMLSpanElement>(null);
@@ -141,12 +135,14 @@ export default function ThresholdScene() {
     window.addEventListener("pointerdown", primeVideo);
     window.addEventListener("wheel", primeVideo, { passive: true });
     const wipeCanvas = wipeCanvasRef.current;
-    const doorLeft = doorLeftRef.current!;
-    const doorRight = doorRightRef.current!;
-    const handleLeft = handleLeftRef.current;
-    const handleRight = handleRightRef.current;
-    const handleBaseLeft = handleBaseLeftRef.current;
-    const handleBaseRight = handleBaseRightRef.current;
+    // The doors are rendered by <ThresholdDoors /> as the page's top-most
+    // layer (above the header), not inside this scene — look them up by class.
+    const doorLeft = document.querySelector<HTMLImageElement>(".threshold__door--left")!;
+    const doorRight = document.querySelector<HTMLImageElement>(".threshold__door--right")!;
+    const handleLeft = document.querySelector<HTMLImageElement>(".threshold__handle--left");
+    const handleRight = document.querySelector<HTMLImageElement>(".threshold__handle--right");
+    const handleBaseLeft = document.querySelector<HTMLImageElement>(".threshold__handle-base--left");
+    const handleBaseRight = document.querySelector<HTMLImageElement>(".threshold__handle-base--right");
     const copy = copyRef.current;
     const lines = [line1Ref.current, line2Ref.current].filter(Boolean) as HTMLElement[];
     const ctaGroup = ctaGroupRef.current;
@@ -411,18 +407,9 @@ export default function ThresholdScene() {
           .set([...lines, ctaGroup].filter(Boolean) as HTMLElement[], { opacity: 1, y: 0 }, doorOpenStart);
 
         if (chrome) {
-          // .chrome is position: fixed above the whole scene, so it can't be
-          // stacked under the doors — clip it to the gap between them instead,
-          // same ease/duration as the doors' own xPercent ±101 (each door is
-          // ~50.5vw of travel, hence -0.5% at the end).
-          seq
-            .set(chrome, { autoAlpha: 1, clipPath: "inset(0% 50% 0% 50%)" }, doorOpenStart)
-            .to(
-              chrome,
-              { clipPath: "inset(0% -0.5% 0% -0.5%)", duration: doorOpenDuration, ease: "power2.inOut" },
-              doorOpenStart,
-            )
-            .set(chrome, { clearProps: "clipPath" }, doorOpenStart + doorOpenDuration);
+          // The header sits under the doors (see ThresholdDoors), so it's
+          // simply switched on as they start to open and revealed by them.
+          seq.set(chrome, { autoAlpha: 1 }, doorOpenStart);
         }
       });
 
@@ -515,66 +502,6 @@ export default function ThresholdScene() {
             width={1920}
             height={1080}
             aria-hidden="true"
-            decoding="async"
-          />
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            ref={doorLeftRef}
-            className="threshold__door threshold__door--left"
-            src={asset("/assets/00-threshold/door-left.webp")}
-            alt=""
-            width={1376}
-            height={2562}
-            decoding="async"
-          />
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            ref={handleBaseLeftRef}
-            className="threshold__handle-base threshold__handle-base--left"
-            src={asset("/assets/00-threshold/handle-left-base.svg")}
-            alt=""
-            width={1375}
-            height={2560}
-            decoding="async"
-          />
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            ref={handleLeftRef}
-            className="threshold__handle threshold__handle--left"
-            src={asset("/assets/00-threshold/handle-left.svg")}
-            alt=""
-            width={1375}
-            height={2560}
-            decoding="async"
-          />
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            ref={doorRightRef}
-            className="threshold__door threshold__door--right"
-            src={asset("/assets/00-threshold/door-right.webp")}
-            alt=""
-            width={1375}
-            height={2562}
-            decoding="async"
-          />
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            ref={handleBaseRightRef}
-            className="threshold__handle-base threshold__handle-base--right"
-            src={asset("/assets/00-threshold/handle-right-base.svg")}
-            alt=""
-            width={1375}
-            height={2560}
-            decoding="async"
-          />
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            ref={handleRightRef}
-            className="threshold__handle threshold__handle--right"
-            src={asset("/assets/00-threshold/handle-right.svg")}
-            alt=""
-            width={1375}
-            height={2560}
             decoding="async"
           />
         </div>

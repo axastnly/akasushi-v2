@@ -3,6 +3,7 @@
 import { useEffect } from "react";
 import Chrome from "@/components/Chrome";
 import ThresholdScene from "@/components/ThresholdScene";
+import ThresholdDoors from "@/components/ThresholdDoors";
 import ExperienceSection from "@/components/ExperienceSection";
 import Footer from "@/components/Footer";
 import ReserveModalProvider from "@/components/ReserveModalProvider";
@@ -59,6 +60,7 @@ export default function Home() {
         Skip the intro
       </a>
       <Chrome />
+      <ThresholdDoors />
       <main>
         <ThresholdScene />
         <ExperienceSection />
