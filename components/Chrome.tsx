@@ -14,9 +14,11 @@ type ChromeProps = {
   // need it visible from the start instead. See the unscoped
   // .chrome.is-visible rule in globals.css.
   alwaysVisible?: boolean;
+  /** Frosted backdrop: blur that fades out toward the bar's bottom edge. */
+  blur?: boolean;
 };
 
-export default function Chrome({ alwaysVisible = false }: ChromeProps) {
+export default function Chrome({ alwaysVisible = false, blur = false }: ChromeProps) {
   const { openReserve } = useReserveModal();
   const pathname = usePathname();
   const [menuOpen, setMenuOpen] = useState(false);
@@ -74,7 +76,10 @@ export default function Chrome({ alwaysVisible = false }: ChromeProps) {
   return (
     // data-open (not a class) so React re-renders never clobber the
     // is-visible class ThresholdScene toggles on this element directly.
-    <header className={alwaysVisible ? "chrome is-visible" : "chrome"} data-open={menuOpen || undefined}>
+    <header
+      className={["chrome", alwaysVisible && "is-visible", blur && "chrome--blur"].filter(Boolean).join(" ")}
+      data-open={menuOpen || undefined}
+    >
       <div className="chrome__container">
         {isHome ? (
           <a className="brand" href="#scene-00" aria-label="AKA Restaurant & Lounge, home">

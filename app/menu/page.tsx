@@ -106,7 +106,7 @@ export default function MenuPage() {
 
   return (
     <ReserveModalProvider>
-      <Chrome alwaysVisible />
+      <Chrome alwaysVisible blur />
       <div className="menu-page">
         <main id="menu" className="menu-layout">
           <aside className="category-selector" ref={categorySelectorRef} aria-label="Menu categories">
