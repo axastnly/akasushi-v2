@@ -1057,13 +1057,16 @@ a.site-footer__text:focus-visible {
   min-width: 0;
   scroll-margin-top: 145px;
 }
+/* Vertical position + size match .gallery-page__title exactly: its top
+   sits at the gallery's padding-top (clamp below) from the page top —
+   minus .menu-layout's own 20px top margin here. */
 .menu-content > h1 {
-  margin: 19px 28px 7px;
+  margin: calc(clamp(8rem, 6rem + 6vw, 11rem) - 20px) 28px 7px;
   font-family: var(--font-display);
-  font-size: 48px;
+  font-size: clamp(3rem, 4vw, 4.25rem);
   font-weight: 400;
   letter-spacing: -0.96px;
-  line-height: normal;
+  line-height: 1.12;
 }
 
 .sections {
@@ -1225,9 +1228,10 @@ a.site-footer__text:focus-visible {
   .menu-content {
     scroll-margin-top: 170px;
   }
+  /* Below 900px the 62px-tall category bar sits above the h1 in flow
+     (and .menu-layout's top margin is 0), so subtract that instead. */
   .menu-content > h1 {
-    margin: 28px 24px 12px;
-    font-size: 42px;
+    margin: calc(clamp(8rem, 6rem + 6vw, 11rem) - 62px) 24px 12px;
   }
   .menu-section {
     gap: 28px;
@@ -1422,6 +1426,13 @@ a.site-footer__text:focus-visible {
     columns: 1;
   }
   .gallery-page__title {
+    font-size: clamp(1.85rem, 9.8vw, 2.75rem);
+  }
+}
+
+/* Menu h1 phone size — same step as .gallery-page__title. */
+@media (max-width: 47.99em) {
+  .menu-content > h1 {
     font-size: clamp(1.85rem, 9.8vw, 2.75rem);
   }
 }
