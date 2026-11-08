@@ -7,7 +7,7 @@ import { useEffect, useRef } from "react";
    half). The "leave" half is Chrome's nav links adding html.is-leaving,
    which fades the current page's veil back in before navigating. Works for
    browser back/forward too (those only get the fade-in). */
-export const PAGE_LEAVE_MS = 350;
+export const PAGE_LEAVE_MS = 450;
 
 export default function PageVeil() {
   const ref = useRef<HTMLDivElement>(null);

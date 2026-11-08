@@ -1463,21 +1463,23 @@ a.site-footer__text:focus-visible {
 }
 
 /* ── Page transition veil (see components/PageVeil.tsx) ──────────────── */
+/* Sits UNDER the top bar (--z-chrome: 50) so the bar stays put across
+   pages; only the page content fades. Above content/footer (≤ 20). */
 .page-veil {
   position: fixed;
   inset: 0;
-  z-index: 1000;
+  z-index: 45;
   background: #000;
   pointer-events: none;
   opacity: 1;
-  transition: opacity 0.45s ease;
+  transition: opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1);
 }
 .page-veil.is-clear {
   opacity: 0;
 }
 html.is-leaving .page-veil {
   opacity: 1;
-  transition-duration: 0.35s;
+  transition: opacity 0.45s cubic-bezier(0.65, 0, 0.35, 1);
 }
 @media (prefers-reduced-motion: reduce) {
   .page-veil {
