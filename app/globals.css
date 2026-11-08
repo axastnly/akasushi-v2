@@ -1461,3 +1461,27 @@ a.site-footer__text:focus-visible {
     font-size: clamp(1.85rem, 9.8vw, 2.75rem);
   }
 }
+
+/* ── Page transition veil (see components/PageVeil.tsx) ──────────────── */
+.page-veil {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  background: #000;
+  pointer-events: none;
+  opacity: 1;
+  transition: opacity 0.45s ease;
+}
+.page-veil.is-clear {
+  opacity: 0;
+}
+html.is-leaving .page-veil {
+  opacity: 1;
+  transition-duration: 0.35s;
+}
+@media (prefers-reduced-motion: reduce) {
+  .page-veil {
+    transition: none;
+  }
+}
+

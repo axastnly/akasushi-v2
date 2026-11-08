@@ -2,11 +2,12 @@
 
 import { useEffect, useState, type MouseEvent } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import Button from "./Button";
 import { asset } from "@/lib/paths";
 import { getLenis } from "@/lib/motion";
 import { useReserveModal } from "./ReserveModalProvider";
+import { PAGE_LEAVE_MS } from "./PageVeil";
 
 type ChromeProps = {
   // ThresholdScene's own intro animation is what reveals .chrome
@@ -21,6 +22,7 @@ type ChromeProps = {
 export default function Chrome({ alwaysVisible = false, blur = false }: ChromeProps) {
   const { openReserve } = useReserveModal();
   const pathname = usePathname();
+  const router = useRouter();
   const [menuOpen, setMenuOpen] = useState(false);
   const isHome = pathname === "/" || pathname === "";
 
@@ -55,14 +57,24 @@ export default function Chrome({ alwaysVisible = false, blur = false }: ChromePr
   };
 
   const isActive = (path: string) => pathname === path || pathname === `${path}/`;
-  const close = () => setMenuOpen(false);
+
+  // Fade to black, then navigate; the new page's PageVeil fades it back in.
+  // Modifier-clicks (new tab etc.) keep the browser's default behaviour.
+  const navigate = (href: string) => (e: MouseEvent<HTMLAnchorElement>) => {
+    setMenuOpen(false);
+    if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return;
+    e.preventDefault();
+    if (isActive(href)) return;
+    document.documentElement.classList.add("is-leaving");
+    window.setTimeout(() => router.push(href), PAGE_LEAVE_MS);
+  };
 
   const links = (
     <>
-      <Link className="chrome__link" href="/gallery" aria-current={isActive("/gallery") ? "page" : undefined} onClick={close}>
+      <Link className="chrome__link" href="/gallery" aria-current={isActive("/gallery") ? "page" : undefined} onClick={navigate("/gallery")}>
         Gallery
       </Link>
-      <Link className="chrome__link" href="/menu" aria-current={isActive("/menu") ? "page" : undefined} onClick={close}>
+      <Link className="chrome__link" href="/menu" aria-current={isActive("/menu") ? "page" : undefined} onClick={navigate("/menu")}>
         Menu
       </Link>
       <a className="chrome__link" href="#site-footer" onClick={goToContact}>
@@ -89,7 +101,7 @@ export default function Chrome({ alwaysVisible = false, blur = false }: ChromePr
             {logo}
           </a>
         ) : (
-          <Link className="brand" href="/" aria-label="AKA Restaurant & Lounge, home">
+          <Link className="brand" href="/" aria-label="AKA Restaurant & Lounge, home" onClick={navigate("/")}>
             {logo}
           </Link>
         )}
