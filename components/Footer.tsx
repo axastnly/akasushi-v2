@@ -73,7 +73,7 @@ export default function Footer() {
       </div>
 
       <div className="site-footer__bottom">
-        <p>© 2025 AKA Restaurant</p>
+        <p>© 2026 AKA Restaurant</p>
       </div>
     </footer>
   );
