@@ -148,7 +148,7 @@ ul {
   left: 0;
   right: 0;
   z-index: var(--z-chrome);
-  background: linear-gradient(to bottom, rgb(0 0 0 / 0.77) 0%, rgb(0 0 0 / 0) 100%);
+  background: linear-gradient(to bottom, rgb(0 0 0 / 1) 0%, rgb(0 0 0 / 0) 100%);
   pointer-events: none;
   opacity: 0;
   visibility: hidden;
@@ -191,6 +191,10 @@ ul {
   backdrop-filter: blur(14px);
   -webkit-mask-image: linear-gradient(to bottom, black 55%, transparent 100%);
   mask-image: linear-gradient(to bottom, black 55%, transparent 100%);
+}
+/* No blur on the homepage (video/intro behind the bar) — gradient only. */
+.chrome[data-home]::before {
+  display: none;
 }
 /* Centre nav (Gallery / Menu / Contact Us). Absolutely centred so it sits
    in the true middle regardless of logo vs Reserve widths. Collapses into

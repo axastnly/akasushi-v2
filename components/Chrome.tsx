@@ -92,6 +92,7 @@ export default function Chrome({ alwaysVisible = false }: ChromeProps) {
     <header
       className={alwaysVisible ? "chrome is-visible" : "chrome"}
       data-open={menuOpen || undefined}
+      data-home={isHome || undefined}
     >
       <div className="chrome__container">
         {isHome ? (
