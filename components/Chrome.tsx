@@ -42,12 +42,15 @@ export default function Chrome({ alwaysVisible = false, blur = false }: ChromePr
     const footer = document.getElementById("site-footer");
     if (!footer) return;
     e.preventDefault();
-    const lenis = document.documentElement.classList.contains("lenis") ? getLenis() : null;
+    // Only the homepage (the one with the pinned scene) runs Lenis. On every
+    // other page scroll natively — a Lenis instance left over from the
+    // homepage after client-side navigation is dead and would swallow it.
+    const lenis = document.querySelector(".scene__pin") ? getLenis() : null;
     if (lenis) {
       lenis.start();
       lenis.scrollTo(footer, { immediate: true });
     } else {
-      footer.scrollIntoView({ behavior: "smooth", block: "start" });
+      window.scrollTo({ top: footer.getBoundingClientRect().top + window.scrollY, behavior: "smooth" });
     }
   };
 
