@@ -1182,8 +1182,16 @@ a.site-footer__text:focus-visible {
   text-transform: uppercase;
   white-space: nowrap;
 }
+/* Label + line share one fixed-length container (capped to the column on
+   narrow screens); the text takes what it needs and the line fills the rest,
+   so every sub-category rule ends at the same point. */
+.menu-item__group {
+  width: 280px;
+  max-width: 100%;
+}
 .menu-item__group::after {
-  width: 100%;
+  flex: 1;
+  min-width: 24px;
   height: 1px;
   content: "";
   background: linear-gradient(90deg, rgb(221 68 60 / 65%), rgb(221 68 60 / 0%));
