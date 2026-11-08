@@ -1160,6 +1160,13 @@ a.site-footer__text:focus-visible {
   padding: 30px 15px;
   border-bottom: 1.5px solid rgb(255 255 255 / 10%);
 }
+/* Text column fills the space up to the price, so a sub-category label
+   (fixed 280px, max-width 100%) shrinks to the column on narrow screens
+   instead of stretching it and pushing the price out of line. */
+.menu-item > div {
+  flex: 1;
+  min-width: 0;
+}
 .menu-item h3 {
   margin: 0 0 15px;
   font-family: var(--font-display);
@@ -1283,7 +1290,7 @@ a.site-footer__text:focus-visible {
 
 @media (max-width: 640px) {
   .menu-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
     gap: 0;
   }
   .menu-item {

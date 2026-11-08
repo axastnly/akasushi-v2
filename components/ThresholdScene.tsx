@@ -294,7 +294,19 @@ export default function ThresholdScene() {
         },
       });
 
-      bg.addEventListener("ended", maybeStartPhase2, { once: true });
+      // The intro clip ending is one of the two things that unlock scroll.
+      // If a phone never plays it (iOS Low Power Mode, a stalled load),
+      // "ended" never fires and the page would stay locked forever — so a
+      // failed play() or a timeout past the clip's length counts too.
+      let bgPartDone = false;
+      let bgSafetyTimer = 0;
+      const finishBgPart = () => {
+        if (bgPartDone) return;
+        bgPartDone = true;
+        window.clearTimeout(bgSafetyTimer);
+        maybeStartPhase2();
+      };
+      bg.addEventListener("ended", finishBgPart, { once: true });
 
       // "Skip the intro" lands on the experience section, which starts exactly
       // where this pin's scroll-jacked timeline ends — a plain anchor jump
@@ -318,13 +330,15 @@ export default function ThresholdScene() {
               new Promise<void>((resolve) => {
                 const isVideo = el.tagName === "VIDEO";
                 if (isVideo) {
-                  // readyState 2 (loadeddata) only guarantees the CURRENT
-                  // frame decoded — nowhere near enough to promise smooth
-                  // playback through the whole clip. readyState 4 /
-                  // canplaythrough is the browser's own estimate that it
-                  // can play through without stalling to buffer more.
-                  if ((el as HTMLVideoElement).readyState >= 4) return resolve();
-                  el.addEventListener("canplaythrough", () => resolve(), { once: true });
+                  // Desktop: readyState 4 / canplaythrough — the browser's own
+                  // estimate that it can play through without stalling.
+                  // Mobile: iOS doesn't buffer a not-yet-playing video that
+                  // far, so canplaythrough never fires and the intro would
+                  // sit on the timeout — start on the first frame instead.
+                  const isMobile = window.matchMedia("(max-width: 47.99em)").matches;
+                  const [minState, event] = isMobile ? [2, "loadeddata"] : [4, "canplaythrough"];
+                  if ((el as HTMLVideoElement).readyState >= minState) return resolve();
+                  el.addEventListener(event, () => resolve(), { once: true });
                 } else {
                   if ((el as HTMLImageElement).complete) return resolve();
                   el.addEventListener("load", () => resolve(), { once: true });
@@ -385,7 +399,9 @@ export default function ThresholdScene() {
               // the user's first touch/scroll landed after the video end).
               disablePriming();
               bg.currentTime = 0;
-              bg.play().catch(() => {});
+              bg.play().catch(() => finishBgPart());
+              const clipMs = (isFinite(bg.duration) && bg.duration > 0 ? bg.duration : 4) * 1000;
+              bgSafetyTimer = window.setTimeout(finishBgPart, clipMs + 2500);
             },
             undefined,
             doorOpenStart,
@@ -420,7 +436,8 @@ export default function ThresholdScene() {
         seq?.kill();
         bgFadeTween?.kill();
         titleCardTl?.kill();
-        bg.removeEventListener("ended", maybeStartPhase2);
+        bg.removeEventListener("ended", finishBgPart);
+        window.clearTimeout(bgSafetyTimer);
         skipLink?.removeEventListener("click", onSkip);
         bg.pause();
         // Guards against unmounting mid-intro/mid-fade leaving scroll

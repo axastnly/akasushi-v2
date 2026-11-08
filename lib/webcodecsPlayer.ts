@@ -16,7 +16,11 @@
    past that, resets the decoder and replays from the nearest preceding
    keyframe instead. Every decoded frame is closed immediately except the
    one actually being scrubbed to — at most one VideoFrame is ever held
-   open per player. */
+   open per player.
+
+   Fallback: if WebCodecs is unavailable (older iOS Safari, in-app
+   browsers) or the decoder fails, the same canvas is drawn from a hidden
+   muted, playsInline <video> of the same file, scrubbed via currentTime. */
 
 import { createFile, DataStream, Endianness, type Sample } from "mp4box";
 
@@ -53,6 +57,9 @@ export class WebCodecsPlayer {
   private latestFrame: VideoFrame | null = null;
   private resizeObserver: ResizeObserver;
   private destroyed = false;
+  private fallback: HTMLVideoElement | null = null;
+  private fallbackSeeking = false;
+  private lastProgress = 0;
   public onStats: ((s: PlayerStats) => void) | null = null;
 
   constructor(canvas: HTMLCanvasElement, url: string) {
@@ -80,17 +87,84 @@ export class WebCodecsPlayer {
       this.ctx.imageSmoothingEnabled = true;
       this.ctx.imageSmoothingQuality = "high";
       if (this.latestFrame) this.drawFrame(this.latestFrame);
+      else if (this.fallback) this.drawFallback();
     }
   }
 
   private drawFrame(frame: VideoFrame) {
+    this.drawCover(frame, frame.displayWidth, frame.displayHeight);
+  }
+
+  private drawCover(src: CanvasImageSource, sw: number, sh: number) {
+    if (!sw || !sh) return;
     const cw = this.canvas.width;
     const ch = this.canvas.height;
-    const scale = Math.max(cw / frame.displayWidth, ch / frame.displayHeight);
-    const dw = frame.displayWidth * scale;
-    const dh = frame.displayHeight * scale;
+    const scale = Math.max(cw / sw, ch / sh);
+    const dw = sw * scale;
+    const dh = sh * scale;
     this.ctx.clearRect(0, 0, cw, ch);
-    this.ctx.drawImage(frame, (cw - dw) / 2, (ch - dh) / 2, dw, dh);
+    this.ctx.drawImage(src, (cw - dw) / 2, (ch - dh) / 2, dw, dh);
+  }
+
+  /* ── <video> fallback ─────────────────────────────────────────────── */
+  private useFallback(reason: unknown) {
+    if (this.fallback || this.destroyed) return;
+    console.warn(`WebCodecs unavailable for ${this.url}, using <video> fallback:`, reason);
+    try {
+      this.decoder?.close();
+    } catch {
+      // already closed
+    }
+    this.decoder = null;
+    const v = document.createElement("video");
+    v.muted = true;
+    v.playsInline = true;
+    v.setAttribute("muted", "");
+    v.setAttribute("playsinline", "");
+    v.preload = "auto";
+    v.crossOrigin = "anonymous";
+    // In the DOM (invisibly) — iOS is unreliable about loading/painting
+    // detached video elements.
+    v.style.cssText = "position:fixed;left:0;top:0;width:1px;height:1px;opacity:0;pointer-events:none;";
+    v.addEventListener("loadeddata", () => {
+      // iOS only paints a seeked frame once the element has played; muted
+      // inline play() is allowed, so prime it and pause immediately.
+      v.play().then(() => v.pause()).catch(() => {});
+      this.seekFallback(this.lastProgress);
+      this.drawFallback();
+    });
+    v.addEventListener("seeked", () => {
+      this.fallbackSeeking = false;
+      this.drawFallback();
+      // Catch up if progress moved while that seek was in flight.
+      const t = this.fallbackTime(this.lastProgress);
+      if (t !== null && Math.abs(v.currentTime - t) > 0.02) this.seekFallback(this.lastProgress);
+    });
+    v.src = this.url;
+    document.body.appendChild(v);
+    this.fallback = v;
+    this.onStats?.({ status: "ready", frameCount: 0, currentFrame: 0, mode: "-" });
+  }
+
+  private fallbackTime(p: number) {
+    const v = this.fallback;
+    if (!v || !isFinite(v.duration) || v.duration <= 0) return null;
+    return Math.min(Math.max(0, Math.min(1, p)) * v.duration, Math.max(0, v.duration - 0.001));
+  }
+
+  private seekFallback(p: number) {
+    const v = this.fallback;
+    const t = this.fallbackTime(p);
+    if (!v || t === null || this.fallbackSeeking) return;
+    if (Math.abs(v.currentTime - t) < 0.001) return;
+    this.fallbackSeeking = true;
+    v.currentTime = t;
+  }
+
+  private drawFallback() {
+    const v = this.fallback;
+    if (!v || v.readyState < 2) return;
+    this.drawCover(v, v.videoWidth, v.videoHeight);
   }
 
   private handleFrame = (frame: VideoFrame) => {
@@ -113,14 +187,25 @@ export class WebCodecsPlayer {
   }
 
   async load(): Promise<void> {
-    const res = await fetch(this.url);
-    const arrayBuffer = (await res.arrayBuffer()) as MP4ArrayBuffer;
+    if (typeof window === "undefined" || typeof window.VideoDecoder === "undefined") {
+      this.useFallback("VideoDecoder not supported");
+      return;
+    }
+    let arrayBuffer: MP4ArrayBuffer;
+    try {
+      const res = await fetch(this.url);
+      arrayBuffer = (await res.arrayBuffer()) as MP4ArrayBuffer;
+    } catch (e) {
+      this.useFallback(e);
+      return;
+    }
     arrayBuffer.fileStart = 0;
 
     const mp4file = createFile();
 
     mp4file.onError = (e: string) => {
       console.error(`mp4box error (${this.url}):`, e);
+      this.useFallback(e);
     };
 
     mp4file.onReady = (info) => {
@@ -137,6 +222,7 @@ export class WebCodecsPlayer {
       const avcC = trak.mdia.minf.stbl.stsd.entries[0].avcC;
       if (!avcC) {
         console.error(`no avcC box in ${this.url} — only H.264 is handled`);
+        this.useFallback("no avcC box");
         return;
       }
       const stream = new DataStream(undefined, 0, Endianness.BIG_ENDIAN);
@@ -151,18 +237,33 @@ export class WebCodecsPlayer {
         description,
       };
 
-      this.decoder = new VideoDecoder({
-        output: this.handleFrame,
-        error: (e) => console.error(`decoder error (${this.url}):`, e),
-      });
-      this.decoder.configure(this.decoderConfig);
+      try {
+        this.decoder = new VideoDecoder({
+          output: this.handleFrame,
+          error: (e) => {
+            console.error(`decoder error (${this.url}):`, e);
+            this.useFallback(e);
+          },
+        });
+        this.decoder.configure(this.decoderConfig);
+      } catch (e) {
+        this.useFallback(e);
+        return;
+      }
+      // Some browsers expose VideoDecoder but can't decode this profile.
+      const config = this.decoderConfig;
+      VideoDecoder.isConfigSupported(config)
+        .then((r) => {
+          if (!r.supported) this.useFallback(`unsupported config ${config.codec}`);
+        })
+        .catch(() => {});
 
       mp4file.setExtractionOptions(track.id, null, { nbSamples: Infinity });
       mp4file.start();
     };
 
     mp4file.onSamples = (_id: number, _user: unknown, newSamples: Sample[]) => {
-      if (this.destroyed) return;
+      if (this.destroyed || this.fallback) return;
       for (const s of newSamples) {
         if (!s.data) continue;
         this.samples.push({
@@ -185,6 +286,11 @@ export class WebCodecsPlayer {
       needed to reach the new target (continue vs. reset+reseek), never
       more. */
   seekToProgress(p: number) {
+    this.lastProgress = p;
+    if (this.fallback) {
+      this.seekFallback(p);
+      return;
+    }
     if (!this.decoder || !this.decoderConfig || this.samples.length === 0) return;
     const clamped = Math.max(0, Math.min(1, p));
     const target = Math.round(clamped * (this.samples.length - 1));
@@ -213,16 +319,22 @@ export class WebCodecsPlayer {
     }
 
     this.targetTimestampUs = Math.round(this.samples[target].cts * 1e6);
-    for (let i = startIndex; i <= target; i++) {
-      const s = this.samples[i];
-      this.decoder.decode(
-        new EncodedVideoChunk({
-          type: s.isKeyframe ? "key" : "delta",
-          timestamp: Math.round(s.cts * 1e6),
-          duration: Math.round(s.duration * 1e6),
-          data: s.data,
-        }),
-      );
+    try {
+      for (let i = startIndex; i <= target; i++) {
+        const s = this.samples[i];
+        this.decoder.decode(
+          new EncodedVideoChunk({
+            type: s.isKeyframe ? "key" : "delta",
+            timestamp: Math.round(s.cts * 1e6),
+            duration: Math.round(s.duration * 1e6),
+            data: s.data,
+          }),
+        );
+      }
+    } catch (e) {
+      this.useFallback(e);
+      this.seekFallback(p);
+      return;
     }
     this.lastFedIndex = target;
     this.emitStats(mode);
@@ -236,6 +348,12 @@ export class WebCodecsPlayer {
       this.decoder?.close();
     } catch {
       // already closed
+    }
+    if (this.fallback) {
+      this.fallback.removeAttribute("src");
+      this.fallback.load();
+      this.fallback.remove();
+      this.fallback = null;
     }
   }
 }
