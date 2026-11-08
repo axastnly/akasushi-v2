@@ -1310,7 +1310,7 @@ a.site-footer__text:focus-visible {
   --u: calc(100vw / 1512);
   position: relative;
   background: #000;
-  padding: calc(60 * var(--u)) 0 calc(158.33 * var(--u));
+  padding: calc(158 * var(--u)) 0 calc(158.33 * var(--u));
   text-align: center;
 }
 
