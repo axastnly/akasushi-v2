@@ -18,6 +18,14 @@ const PHOTOS: { file: string; w: number; h: number; alt: string }[] = [
   { file: "9.webp", w: 1000, h: 715, alt: "A small plate served beside an AKA napkin" },
   { file: "r30.webp", w: 1000, h: 1463, alt: "Golden statue in the AKA dining room" },
   { file: "r31.webp", w: 1000, h: 715, alt: "The illuminated AKA sign" },
+  { file: "DSC_9241.webp", w: 1000, h: 1500, alt: "A server presenting a tray of nigiri at the Grand Opening" },
+  { file: "DSC_9254-Edit.webp", w: 1000, h: 1500, alt: "A DJ performing beneath the glowing AKA logo at the Grand Opening" },
+  { file: "DSC_9307.webp", w: 1000, h: 1500, alt: "Guests at the hostess stand beneath the red AKA sign" },
+  { file: "DSC_9313.webp", w: 1000, h: 1500, alt: "A server offering a tray of canapés at the Grand Opening" },
+  { file: "DSC_9318.webp", w: 1000, h: 1500, alt: "A candlelit table set for the Grand Opening, red florals at its center" },
+  { file: "DSC_9443.webp", w: 1000, h: 1500, alt: "Guests gathered on AKA's red-lit outdoor terrace" },
+  { file: "DSC_9445.webp", w: 1000, h: 1500, alt: "Guests dining beneath the glowing red AKA sign at the entrance" },
+  { file: "DSC_9516.webp", w: 1000, h: 1500, alt: "Guests seated at a Grand Opening table beneath red draped canopy" },
 ];
 
 export default function GalleryPage() {
