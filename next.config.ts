@@ -17,7 +17,7 @@ const nextConfig: NextConfig = {
   // Dev server blocks cross-origin HMR/dev-resource requests by default —
   // needed to open this on a phone/another device over the LAN. No
   // effect on the production static export.
-  allowedDevOrigins: ["10.255.252.20"],
+  allowedDevOrigins: ["10.255.252.20", "192.168.70.103"],
   turbopack: {
     rules: {
       "*.css": {

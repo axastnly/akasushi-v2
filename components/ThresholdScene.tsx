@@ -11,6 +11,7 @@ import {
   getLenis,
 } from "@/lib/motion";
 import { WebCodecsPlayer } from "@/lib/webcodecsPlayer";
+import { logDebug } from "@/lib/debugLog";
 import { asset } from "@/lib/paths";
 import Button from "./Button";
 import { useReserveModal } from "./ReserveModalProvider";
@@ -134,6 +135,24 @@ export default function ThresholdScene() {
     window.addEventListener("touchstart", primeVideo, { passive: true });
     window.addEventListener("pointerdown", primeVideo);
     window.addEventListener("wheel", primeVideo, { passive: true });
+
+    // If the real (non-gesture) bg.play() below gets rejected — same Low
+    // Power Mode case as above, just too late for priming to have helped —
+    // don't skip the intro. Frame 0 is already painted (bg faded in at
+    // doorOpenStart regardless of play() succeeding), so it reads as a
+    // still; wait for any real tap and retry there instead.
+    let playRetryArmed = false;
+    const retryBgPlay = () => {
+      window.removeEventListener("pointerdown", retryBgPlay);
+      window.removeEventListener("touchstart", retryBgPlay);
+      bg.play().catch(() => {});
+    };
+    const armPlayRetry = () => {
+      if (playRetryArmed) return;
+      playRetryArmed = true;
+      window.addEventListener("pointerdown", retryBgPlay, { once: true });
+      window.addEventListener("touchstart", retryBgPlay, { once: true, passive: true });
+    };
     const wipeCanvas = wipeCanvasRef.current;
     // The doors are rendered by <ThresholdDoors /> as the page's top-most
     // layer (above the header), not inside this scene — look them up by class.
@@ -168,13 +187,28 @@ export default function ThresholdScene() {
     // since swapping the source mid-scrub would restart decoding from
     // scratch.
     const isDesktop = window.matchMedia("(min-width: 48em)").matches;
-    const wipePlayer = wipeCanvas ? new WebCodecsPlayer(wipeCanvas, asset("/assets/00-threshold/bg-wipe.mp4")) : null;
-    const finalePlayer = finaleCanvas
-      ? new WebCodecsPlayer(
-          finaleCanvas,
-          asset(isDesktop ? "/assets/00-threshold/finale-desktop.mp4" : "/assets/00-threshold/finale-mobile.mp4"),
-        )
-      : null;
+    // Belt-and-suspenders on top of WebCodecsPlayer's own internal
+    // try/catch: whatever happens here, it must not stop this effect from
+    // reaching mm.add below — that's what sets up the indicator/door
+    // timelines, so a throw here would freeze the intro on the static
+    // handle SVGs with no animation ever starting.
+    let wipePlayer: WebCodecsPlayer | null = null;
+    try {
+      wipePlayer = wipeCanvas ? new WebCodecsPlayer(wipeCanvas, asset("/assets/00-threshold/bg-wipe.mp4")) : null;
+    } catch (e) {
+      logDebug(`wipePlayer construction failed: ${e}`);
+    }
+    let finalePlayer: WebCodecsPlayer | null = null;
+    try {
+      finalePlayer = finaleCanvas
+        ? new WebCodecsPlayer(
+            finaleCanvas,
+            asset(isDesktop ? "/assets/00-threshold/finale-desktop.mp4" : "/assets/00-threshold/finale-mobile.mp4"),
+          )
+        : null;
+    } catch (e) {
+      logDebug(`finalePlayer construction failed: ${e}`);
+    }
 
     const mmContext = mm.add(MOTION_OK, () => {
       if (copy) gsap.set(copy, { opacity: 1 });
@@ -399,7 +433,7 @@ export default function ThresholdScene() {
               // the user's first touch/scroll landed after the video end).
               disablePriming();
               bg.currentTime = 0;
-              bg.play().catch(() => finishBgPart());
+              bg.play().catch(() => armPlayRetry());
               const clipMs = (isFinite(bg.duration) && bg.duration > 0 ? bg.duration : 4) * 1000;
               bgSafetyTimer = window.setTimeout(finishBgPart, clipMs + 2500);
             },
@@ -484,6 +518,8 @@ export default function ThresholdScene() {
       window.removeEventListener("touchstart", primeVideo);
       window.removeEventListener("pointerdown", primeVideo);
       window.removeEventListener("wheel", primeVideo);
+      window.removeEventListener("touchstart", retryBgPlay);
+      window.removeEventListener("pointerdown", retryBgPlay);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
