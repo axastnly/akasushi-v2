@@ -1430,6 +1430,39 @@ a.site-footer__text:focus-visible {
   left: calc(36 * var(--u));
 }
 
+/* Phone — Figma node 201:5236: single stacked column, image order
+   interleaved via --mobile-order (set per-card in ExperienceSection.tsx). */
+@media (max-width: 47.99em) {
+  .experience__grid {
+    flex-direction: column;
+    gap: 1.75rem;
+    margin-top: 2.5rem;
+  }
+  .experience__col {
+    display: contents;
+  }
+  .experience__col--right {
+    padding-top: 0;
+  }
+  .experience__card {
+    order: var(--mobile-order);
+    height: auto;
+  }
+  .experience__media {
+    height: auto;
+    aspect-ratio: 500 / 550;
+  }
+  .experience__label {
+    top: auto;
+    bottom: 1.1rem;
+    left: 1.3rem;
+    font-size: clamp(1.5rem, 7vw, 2rem);
+  }
+  .experience__col--right .experience__label {
+    left: 1.3rem;
+  }
+}
+
 /* ── Gallery page ────────────────────────────────────────────────────── */
 .gallery-page {
   max-width: 1400px;

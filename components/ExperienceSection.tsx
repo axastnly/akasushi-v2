@@ -24,6 +24,9 @@ type Card = {
   /** Parallax travel of the photo, in design px either side of rest.
       Bigger = moves faster than the page. */
   speed: number;
+  /** Stacking order on the single-column phone layout (Figma node 201:5236) —
+      interleaves the desktop LEFT/RIGHT columns into one sequence. */
+  mobileOrder: number;
 };
 
 /* Labels travel this much further than their own photo, so they slide up
@@ -37,17 +40,19 @@ const LEFT: Card[] = [
     overlay: "linear-gradient(to left, rgba(0, 0, 0, 0.3) 0%, rgba(0, 0, 0, 0) 49.874%)",
     fit: "fill",
     speed: 40,
+    mobileOrder: 1,
   },
   {
-    src: "/assets/02-experience/cocktails.webp",
-    lines: ["Crafted", "Cocktails"],
-    overlay: "linear-gradient(-90deg, rgba(0, 0, 0, 0.45) 0%, rgba(0, 0, 0, 0) 50%)",
-    speed: 60,
+    src: "/assets/02-experience/authentic.webp",
+    lines: ["Authentic", "Experience"],
+    speed: 55,
+    mobileOrder: 3,
   },
   {
     src: "/assets/02-experience/beats.webp",
     lines: ["Live", "Beats"],
     speed: 45,
+    mobileOrder: 6,
   },
 ];
 
@@ -57,17 +62,29 @@ const RIGHT: Card[] = [
     lines: ["Sushi", "Artistry"],
     overlay: "linear-gradient(to bottom, rgba(0, 0, 0, 0) 74.66%, rgba(0, 0, 0, 0.4) 100%)",
     speed: 120,
+    mobileOrder: 2,
+  },
+  {
+    src: "/assets/02-experience/crimson.webp",
+    lines: ["Crimson", "Ambience"],
+    speed: 130,
+    mobileOrder: 4,
   },
   {
     src: "/assets/02-experience/nights.webp",
-    lines: ["nights", "Out"],
+    lines: ["Special", "Nights"],
     speed: 140,
+    mobileOrder: 5,
   },
 ];
 
 function ExperienceCard({ card }: { card: Card }) {
   return (
-    <div className="experience__card" data-speed={card.speed}>
+    <div
+      className="experience__card"
+      data-speed={card.speed}
+      style={{ "--mobile-order": card.mobileOrder } as React.CSSProperties}
+    >
       <div className="experience__media">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
