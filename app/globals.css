@@ -10,6 +10,7 @@
 
   --font-display: "IvyPresto Headline", "Iowan Old Style", Palatino, Georgia, serif;
   --font-ui: "TT Drugs", ui-sans-serif, -apple-system, "Helvetica Neue", Arial, sans-serif;
+  --font-kanji: "Aoyagi Kouzan", "Hiragino Mincho ProN", "Yu Mincho", serif;
 
   --step-display: clamp(1.75rem, 1.15rem + 3.1vw, 4rem);
   --step-ui: clamp(0.7rem, 0.66rem + 0.2vw, 0.8rem);
@@ -48,6 +49,17 @@
   font-family: "TT Drugs";
   src: url("/akasushi-v2/assets/fonts/TTDrugs-Bold.woff2") format("woff2");
   font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+/* Aoyagi Kouzan (青柳衡山) — the brush face the hero's 忍 uses in Figma
+   (node 455:2725). Subset to just the four kanji the finale captions
+   need, which takes the 2MB OTF down to ~2KB; re-run pyftsubset with a
+   wider --text if a caption's kanji ever changes. */
+@font-face {
+  font-family: "Aoyagi Kouzan";
+  src: url("/akasushi-v2/assets/fonts/AoyagiKouzan-subset.woff2") format("woff2");
+  font-weight: 400;
   font-style: normal;
   font-display: swap;
 }
@@ -196,103 +208,261 @@ ul {
 .chrome[data-home]::before {
   display: none;
 }
-/* Centre nav (Gallery / Menu / Contact Us). Absolutely centred so it sits
-   in the true middle regardless of logo vs Reserve widths. Collapses into
-   the .chrome__toggle menu button below 64em. */
+/* Top bar carries no inline nav: logo on the left, Reserve + hamburger
+   on the right at every width, with the navigation living entirely in
+   the .site-menu overlay below. Mirrors the reference build's
+   .entrance-chrome-bar / .header-actions. */
 .chrome__container {
   position: relative;
-}
-.chrome__nav {
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  translate: -50% -50%;
-  display: flex;
-  align-items: center;
-  gap: 2.75rem;
-}
-.chrome__link {
-  font-family: var(--font-ui);
-  font-weight: 400;
-  font-size: 0.85rem;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  color: rgb(255 255 255 / 0.8);
-  text-decoration: none;
-  white-space: nowrap;
-  transition: color 0.2s ease;
-}
-.chrome__link:hover,
-.chrome__link:focus-visible,
-.chrome__link[aria-current="page"] {
-  color: var(--gold);
 }
 .chrome__actions {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+  gap: 13px;
+  pointer-events: auto;
 }
-.chrome__toggle {
-  display: none;
-  appearance: none;
-  width: 44px;
-  height: 44px;
+/* Separate pages darken the bar once scrolled (the homepage keeps its
+   gradient and its video behind the bar instead). */
+.chrome.is-scrolled {
+  background: var(--black);
+  box-shadow: inset 0 -0.0625rem rgb(255 255 255 / 0.1);
+  transition: background-color 0.2s ease, box-shadow 0.2s ease;
+}
+.menu-toggle {
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 50px;
+  height: 50px;
+  margin: 0;
   padding: 0;
   border: 0;
-  background: transparent;
+  color: #fff;
   cursor: pointer;
+  background: rgb(255 255 255 / 0.14);
+  -webkit-backdrop-filter: blur(30px) saturate(1.2);
+  backdrop-filter: blur(30px) saturate(1.2);
+  transition: background 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+}
+.menu-toggle:hover,
+.menu-toggle:focus-visible {
+  background: rgb(255 255 255 / 0.22);
+  outline: none;
+  box-shadow: 0 0 20px rgb(255 255 255 / 0.1);
+}
+.menu-toggle-icon {
+  display: block;
   position: relative;
+  width: 18px;
+  height: 10px;
 }
-.chrome__toggle span {
+.menu-toggle-icon span {
   position: absolute;
-  left: 10px;
-  right: 10px;
+  left: 0;
+  right: 0;
   height: 1.5px;
+  border-radius: 999px;
   background: #fff;
-  transition: translate 0.25s ease, rotate 0.25s ease;
+  transition: transform 0.28s ease-in-out, top 0.28s ease-in-out;
 }
-.chrome__toggle span:first-child {
-  top: 17px;
+.menu-toggle-icon span:first-child {
+  top: 0;
 }
-.chrome__toggle span:last-child {
-  top: 25px;
+.menu-toggle-icon span:last-child {
+  top: calc(100% - 1.5px);
 }
-.chrome[data-open] .chrome__toggle span:first-child {
-  translate: 0 4px;
-  rotate: 45deg;
+.menu-toggle-icon[data-open="true"] span:first-child {
+  top: 50%;
+  transform: translateY(-50%) rotate(45deg);
 }
-.chrome[data-open] .chrome__toggle span:last-child {
-  translate: 0 -4px;
-  rotate: -45deg;
+.menu-toggle-icon[data-open="true"] span:last-child {
+  top: 50%;
+  transform: translateY(-50%) rotate(-45deg);
 }
-.chrome__mobile-nav {
-  display: none;
-}
-@media (max-width: 63.99em) {
-  .chrome__nav {
-    display: none;
+@media (max-width: 47.99em) {
+  .menu-toggle {
+    width: 40px;
   }
-  .chrome__toggle {
-    display: block;
+}
+
+/* ── Site menu overlay ────────────────────────────────────────────────
+   Full-screen dialog portalled into <body>, so it escapes .chrome's own
+   stacking context and can blur everything behind it. */
+.site-menu {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  pointer-events: auto;
+  overscroll-behavior: none;
+  touch-action: none;
+}
+.site-menu-backdrop {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background: rgb(77 0 0 / 0.5);
+}
+/* The bar repeats inside the overlay at the same offsets as .chrome's,
+   so opening the menu reads as the page falling away behind a bar that
+   never moved. */
+.site-menu-chrome {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 2;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+  padding: 1.7rem 2.5rem;
+  padding-top: max(1.7rem, env(safe-area-inset-top, 0px));
+}
+.site-menu-chrome-logo {
+  display: inline-flex;
+  align-items: center;
+}
+.site-menu-panel {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
+  padding: max(6.5rem, calc(env(safe-area-inset-top, 0px) + 5.5rem)) 1.25rem max(1.5rem, env(safe-area-inset-bottom, 0px));
+  color: #fff;
+  pointer-events: none;
+  overscroll-behavior: none;
+  animation: site-menu-panel-in 0.32s ease-out both;
+}
+.site-menu-panel a,
+.site-menu-panel button {
+  pointer-events: auto;
+}
+@keyframes site-menu-panel-in {
+  0% {
+    opacity: 0;
+    transform: translateY(10px);
   }
-  .chrome[data-open] {
-    background: #000;
+  100% {
+    opacity: 1;
+    transform: translateY(0);
   }
-  .chrome__mobile-nav:not([hidden]) {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 1.75rem;
-    padding: 1.5rem 1.2rem 2.5rem;
-    background: #000;
-    border-bottom: 1px solid rgb(255 255 255 / 0.12);
-  }
-  .chrome__mobile-nav .chrome__link {
-    font-family: var(--font-display);
-    font-size: 1.75rem;
-    letter-spacing: 0;
-    text-transform: none;
-    color: #fff;
+}
+.site-menu-nav {
+  flex: 1;
+  display: grid;
+  place-items: center;
+  padding: 1rem 0;
+}
+.site-menu-links {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.15em;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  text-align: center;
+}
+.site-menu-link {
+  display: inline-block;
+  appearance: none;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: clamp(2.25rem, 8vw, 3.5rem);
+  line-height: 140%;
+  letter-spacing: 0;
+  color: #fff;
+  text-align: center;
+  text-decoration: none;
+  transition: color 0.22s ease;
+}
+.site-menu-link:hover,
+.site-menu-link:focus-visible,
+.site-menu-link[aria-current="page"] {
+  color: #dc2218;
+  outline: none;
+}
+.site-menu-footer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.85rem;
+  width: min(100%, 28rem);
+  margin-inline: auto;
+  padding-top: 1.25rem;
+  border-top: 0.0625rem solid rgb(255 255 255 / 0.12);
+  text-align: center;
+}
+.site-menu-social {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1.15rem;
+}
+.site-menu-social-link {
+  display: grid;
+  place-items: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  color: #fff;
+  opacity: 0.92;
+  transition: opacity 0.18s ease;
+}
+.site-menu-social-link:hover,
+.site-menu-social-link:focus-visible {
+  opacity: 1;
+  outline: none;
+}
+.site-menu-location-label {
+  margin: 0.35rem 0 0;
+  font-family: var(--font-ui);
+  font-weight: 700;
+  font-size: 0.8125rem;
+  letter-spacing: 0.06em;
+  color: #fff;
+}
+.site-menu-address {
+  margin: 0;
+  font-style: normal;
+  font-weight: 400;
+  font-size: 0.875rem;
+  line-height: 145%;
+  color: rgb(255 255 255 / 0.78);
+}
+/* Freeze and blur the page behind the overlay. The bar underneath is
+   hidden outright rather than blurred, since the overlay draws its own
+   copy at the same position. */
+html.is-menu-open,
+html.is-menu-open body {
+  overflow: hidden !important;
+  overscroll-behavior: none;
+  touch-action: none;
+}
+html.is-menu-open .chrome {
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+html.is-menu-open .scene__pin,
+html.is-menu-open .site-main,
+html.is-menu-open main,
+html.is-menu-open .site-footer {
+  filter: blur(50px) saturate(1.25);
+  transition: filter 0.28s ease;
+}
+@media (max-width: 47.99em) {
+  .site-menu-chrome {
+    padding: 1.2rem;
+    padding-top: max(1.2rem, env(safe-area-inset-top, 0px));
   }
 }
 
@@ -419,6 +589,126 @@ ul {
   gap: 1.25rem;
   flex-wrap: wrap;
 }
+.scene__scroll-indicator {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  /* Sits on top of .scene__copy-content's own 1.75rem gap, so this is
+     the lever that moves the cue alone without touching the spacing
+     between the hero title and its buttons. */
+  margin-top: 1.25rem;
+  transform: scale(1);
+  filter: drop-shadow(0 0 0 rgb(255 255 255 / 0));
+  /* This transition is the way OUT — it is what applies once
+     .is-nudging is removed. The way IN lives on that rule below, so the
+     two directions can be timed and eased independently. All four
+     values come from lib/scrollIncentives.ts. */
+  transition: transform var(--nudge-out-dur) var(--nudge-out-ease),
+    filter var(--nudge-out-dur) var(--nudge-out-ease);
+}
+/* Toggled by NUDGE (ThresholdScene.tsx) for the nudge's duration — the
+   cue is easy to miss otherwise, so it visibly calls itself out each time
+   rather than relying on the scroll position alone. */
+.scene__scroll-indicator.is-nudge-peak {
+  transform: scale(var(--nudge-scale));
+  filter: drop-shadow(var(--nudge-glow));
+  transition: transform var(--nudge-in-dur) var(--nudge-in-ease),
+    filter var(--nudge-in-dur) var(--nudge-in-ease);
+}
+.scene__scroll-indicator.is-nudging .scene__scroll-indicator-label,
+.scene__scroll-indicator.is-nudging .scene__scroll-indicator-line path,
+.scene__scroll-indicator.is-nudging .scene__scroll-indicator-line circle {
+  animation-duration: 1.1s;
+}
+.scene__scroll-indicator.is-nudging .scene__scroll-indicator-label {
+  opacity: 1;
+}
+.scene__scroll-indicator-label {
+  font-family: var(--font-ui);
+  font-weight: 700;
+  font-size: 0.8125rem;
+  line-height: 1.3;
+  letter-spacing: 0.4em;
+  text-transform: uppercase;
+  color: #fff;
+  opacity: 0.8;
+}
+.scene__scroll-indicator-line {
+  display: block;
+}
+/* inline-block so each letter can carry its own y offset and blur
+   during the staggered entrance; letter-spacing is unaffected. */
+.scene__scroll-indicator-letter {
+  display: inline-block;
+}
+/* The breathe/draw loops below would otherwise be mid-cycle while the
+   cue is still easing in, muddying it. ThresholdScene adds
+   is-cue-animated when it takes control of the cue and is-cue-ready
+   once the entrance finishes, so with JS off the loops simply run as
+   they always did rather than staying paused forever. */
+.scene__scroll-indicator.is-cue-animated .scene__scroll-indicator-label,
+.scene__scroll-indicator.is-cue-animated .scene__scroll-indicator-line path,
+.scene__scroll-indicator.is-cue-animated .scene__scroll-indicator-line circle {
+  animation-play-state: paused;
+}
+.scene__scroll-indicator.is-cue-animated.is-cue-ready .scene__scroll-indicator-label,
+.scene__scroll-indicator.is-cue-animated.is-cue-ready .scene__scroll-indicator-line path,
+.scene__scroll-indicator.is-cue-animated.is-cue-ready .scene__scroll-indicator-line circle {
+  animation-play-state: running;
+}
+.scene__scroll-indicator-label {
+  animation: scroll-label-breathe 3.5s ease-in-out infinite;
+}
+.scene__scroll-indicator-line path {
+  stroke-dasharray: 37.5 37.5;
+  animation: scroll-line-draw 3.5s ease-in-out infinite;
+}
+.scene__scroll-indicator-line circle {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: scroll-dot-travel 3.5s ease-in-out infinite;
+}
+/* Cycle (3.5s): draw down 0-1.615s, hold at bottom 1.615-1.885s,
+   retract toward the dot 1.885-2.962s, hold hidden 2.962-3.5s, repeat. */
+@keyframes scroll-line-draw {
+  0% {
+    stroke-dashoffset: 37.5;
+  }
+  46.154%,
+  53.846% {
+    stroke-dashoffset: 0;
+  }
+  84.615%,
+  100% {
+    stroke-dashoffset: -37.5;
+  }
+}
+@keyframes scroll-dot-travel {
+  0% {
+    transform: translateY(-37.5px);
+    opacity: 1;
+  }
+  46.154%,
+  53.846% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  84.615%,
+  100% {
+    transform: translateY(0);
+    opacity: 0;
+  }
+}
+@keyframes scroll-label-breathe {
+  0%,
+  100% {
+    opacity: 0.6;
+  }
+  50% {
+    opacity: 1;
+  }
+}
 @media (max-width: 47.99em) {
   .scene__copy {
     padding: 0 1.25rem 4rem;
@@ -480,6 +770,16 @@ ul {
 .threshold__bg {
   scale: 1.04;
 }
+/* Figma frame 379:1778's own overlay, reproduced exactly: a radial
+   gradient (black at center fading to transparent), centered at
+   (756, 775) of a 1512x818 frame and stretched by the same transform
+   matrix into a ~74x40 ellipse, at 0.45 opacity. */
+.threshold__vignette {
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml;utf8,<svg viewBox='0 0 1512 818' xmlns='http://www.w3.org/2000/svg' preserveAspectRatio='none'><rect x='0' y='0' height='100%25' width='100%25' fill='url(%23grad)' opacity='0.44999998807907104'/><defs><radialGradient id='grad' gradientUnits='userSpaceOnUse' cx='0' cy='0' r='10' gradientTransform='matrix(-1.2214e-14 -39.9 73.752 -1.6026e-13 756 775)'><stop stop-color='rgba(0,0,0,1)' offset='0'/><stop stop-color='rgba(0,0,0,0)' offset='1'/></radialGradient></defs></svg>");
+  background-size: 100% 100%;
+}
 /* bg--main (the phase-1 intro clip, bg.mp4) needs to line up with
    bg-first-shot.webp, since bg-shot is revealed underneath it as it
    fades out — any mismatch reads as the image "jumping" at the handoff.
@@ -539,6 +839,45 @@ ul {
 }
 .threshold__door {
   z-index: 4;
+}
+/* "Loading", sitting under the handles while the page boots. Typeset
+   exactly like the Reserve button (.btn below) rather than inheriting
+   anything: same UI face, weight, tracking and uppercase, just smaller.
+   Its colour is the handles' own gold — those SVGs are a gradient from
+   #FFBA72 down to #EF7523, and this is the lit mid-tone of it, so the
+   text reads as part of the same metal rather than a near-miss. */
+.threshold__loading {
+  position: absolute;
+  left: 0;
+  right: 0;
+  /* The handle artwork occupies 37.8%-62.3% of its SVG's height. On a
+     tall viewport the handle image maps vertically 1:1 (object-fit:
+     cover crops the sides, not the top and bottom), so its lowest point
+     lands at 62.3% of the screen and this clears it by ~3.5%. A wide
+     viewport crops vertically instead and pushes the artwork lower,
+     which is what the desktop override below is for. Nudge these two if
+     the label ever sits on the metal again. */
+  top: var(--loading-top, 70%);
+  z-index: 5;
+  margin: 0;
+  text-align: center;
+  font-family: var(--font-ui);
+  font-weight: 700;
+  font-size: 0.75rem;
+  line-height: 1.3;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: #fcb05f;
+  pointer-events: none;
+}
+@media (min-width: 48em) {
+  .threshold__loading {
+    /* Wide viewports crop the handle vertically and centre it, dropping
+       the artwork's bottom to roughly 68% of the screen — so the label
+       has to start lower here than it does on a phone. */
+    top: var(--loading-top, 76%);
+    font-size: 0.8125rem;
+  }
 }
 .threshold__handle,
 .threshold__handle-base {
@@ -738,12 +1077,267 @@ ul {
      decoration. */
   pointer-events: none;
 }
+/* One caption block that glides between the finale's four beats — content
+   swaps mid-glide (old half fades out, new half fades in), driven entirely
+   by scroll progress (ThresholdScene sets transform/opacity per frame, no
+   timeline), so it tracks forward/backward scrubbing exactly. */
+.finale-caption {
+  position: absolute;
+  left: 50%;
+  top: 40%;
+  max-width: 28.5rem;
+  text-align: left;
+  opacity: 0;
+  z-index: 7;
+  pointer-events: none;
+}
+.finale-caption__eyebrow,
+.finale-caption__title {
+  font-family: var(--font-display);
+  font-weight: 400;
+  line-height: 1.04;
+  color: #fff;
+  margin: 0;
+}
+.finale-caption__eyebrow {
+  /* 32px at the Figma frame's own 1512px width (nodes 398:2144 etc.),
+     matching the title below (64px there too). */
+  font-size: clamp(1.1rem, 0.8rem + 1.27vw, 2rem);
+}
+.finale-caption__title {
+  font-size: clamp(2rem, 1.2rem + 3.3vw, 4rem);
+  text-shadow: 14px 0 35px rgb(255 255 255 / 0.13);
+}
+
+/* Alternative "ink" transition (CAPTION_TRANSITION in
+   lib/scrollIncentives.ts): caption stays fixed on its beat's side; a
+   brush stroke sweeps across just that block to wipe old → new. */
+.finale-ink {
+  position: absolute;
+  top: 40%;
+  max-width: 28.5rem;
+  opacity: 0;
+  z-index: 7;
+  pointer-events: none;
+}
+.finale-ink--left {
+  left: var(--gutter);
+  text-align: left;
+}
+.finale-ink--right {
+  right: var(--gutter);
+  left: auto;
+  text-align: left;
+}
+.finale-ink__new {
+  position: absolute;
+  inset: 0;
+}
+/* width/top/bottom/background/filter/mask-image are set once from
+   lib/scrollIncentives.ts (ThresholdScene.tsx) — only position/opacity
+   are scrubbed per frame from here on. */
+.finale-ink__stroke {
+  position: absolute;
+  opacity: 0;
+}
+@media (max-width: 47.99em) {
+  .finale-ink {
+    left: 50% !important;
+    right: auto !important;
+    translate: -50% 0;
+    text-align: left;
+    max-width: 90vw;
+  }
+}
+
+/* Third transition ("reveal"): same alternating left/right positioning as
+   "ink" (Figma nodes 398:2144/2347/2392/2437), using the same left-to-right
+   mask-wipe as the title card's "from / The Heart Of Japan" ([data-reveal]
+   below) instead of a travelling block or a brush stroke. */
+.finale-reveal {
+  position: absolute;
+  top: 40%;
+  max-width: 28.5rem;
+  text-align: left;
+  opacity: 0;
+  z-index: 7;
+  pointer-events: none;
+}
+.finale-reveal--left {
+  left: var(--gutter);
+}
+.finale-reveal--right {
+  right: var(--gutter);
+  left: auto;
+}
+@media (max-width: 47.99em) {
+  .finale-reveal {
+    left: 50% !important;
+    right: auto !important;
+    translate: -50% 0;
+    max-width: 90vw;
+  }
+}
+
+/* Fourth transition ("rise"): all four captions sit in the DOM at once,
+   each rising from below the fold, past the middle, off the top on its
+   own beat (ThresholdScene scrubs y/opacity per frame) — side alternates
+   per caption on desktop, overridden to a centred lower-half spot below. */
+/* No z-index on purpose, for the same reason .threshold has none: a
+   positioned element with a z-index forms a stacking context, and a
+   stacking context is an isolated blending group — the kanji's
+   color-dodge would then brighten this empty container instead of the
+   finale video (.finale__canvas, z-index 6) and render flat. The
+   children carry z-index 7 themselves, so they still paint above the
+   video while sharing its group. overflow still clips them: this is
+   their containing block, and clipping is independent of stacking. */
+.finale-rise {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+/* Every caption is placed per-composition from Figma — see RISE_LAYOUT
+   in lib/scrollIncentives.ts, which feeds all of the custom properties
+   used here. --rise-top anchors the English block relative to the
+   screen's vertical centre; the kanji is then offset from that block. */
+.finale-rise__item {
+  position: absolute;
+  top: calc(50% + var(--rise-top, 0px));
+  /* Both of these carry fallbacks and a hard viewport cap on purpose.
+     The width is normally a JS-set custom property; if it is ever
+     missing — a code path that returns before the setup loop, a caption
+     without a RISE_LAYOUT entry — width falls back to auto, the block
+     shrink-wraps to its longest line and the caption runs clean off the
+     side of the screen. Never let this resolve to auto. */
+  width: var(--text-width, 28.5rem);
+  max-width: calc(100vw - 2.4rem);
+  text-align: left;
+}
+/* Pure white, like travel/ink/reveal — and deliberately unblended.
+   White is degenerate in both directions here: under color-burn it is
+   the identity and leaves the backdrop untouched (invisible text),
+   under the kanji's color-dodge it blows the backdrop out to solid
+   white. Either way the caption stops being readable, which is why the
+   blend lives on the kanji alone (below) and never on the English. */
+.finale-rise__item .finale-caption__eyebrow,
+.finale-rise__item .finale-caption__title {
+  color: #fff;
+}
+/* "rise" sizes a bit differently from the other three transitions:
+   32px/84px at the same 1512px desktop reference width (vs. 32px/64px
+   shared by travel/ink/reveal — same eyebrow, taller title). */
+.finale-rise__item .finale-caption__eyebrow {
+  font-size: clamp(1.1rem, 0.8rem + 1.27vw, 2rem);
+}
+.finale-rise__item .finale-caption__title {
+  font-size: clamp(2rem, 1.2rem + 4.29vw, 5.25rem);
+}
+/* Kanji watermark behind each rise caption. It is a sibling of the text
+   rather than a background so it can carry its OWN transform —
+   ThresholdScene drives the two at different speeds, and that
+   difference is the whole effect. It anchors to the same edge its
+   caption does, so one signed offset mirrors correctly on both sides. */
+.finale-rise__kanji {
+  position: absolute;
+  z-index: 7;
+  top: var(--kanji-y);
+  mix-blend-mode: var(--kanji-blend);
+  font-family: var(--font-kanji);
+  font-size: var(--kanji-size);
+  line-height: 1.04;
+  /* Alpha is inside this colour, never a separate opacity property. */
+  color: var(--kanji-color);
+  /* Static softening. filter makes this element a stacking context,
+     which isolates its DESCENDANTS — it has none, and the element's own
+     dodge still composites against the video behind it (it is filtered
+     first, then blended), so this does not undo the stacking work. */
+  filter: blur(var(--kanji-blur));
+  opacity: 0;
+  white-space: nowrap;
+  pointer-events: none;
+  will-change: transform, opacity;
+}
+.finale-rise__item--left .finale-rise__kanji {
+  left: var(--kanji-x);
+  right: auto;
+}
+.finale-rise__item--right .finale-rise__kanji {
+  right: var(--kanji-x);
+  left: auto;
+}
+/* Wraps the English so it can be transformed independently of the
+   kanji; stays in flow so the item still sizes to its text. */
+.finale-rise__text {
+  position: relative;
+  z-index: 7;
+  opacity: 0;
+  will-change: transform, opacity;
+}
+@media (max-width: 47.99em) {
+  /* Figma centres the English on phones and keeps only the kanji
+     alternating left/right, so the item loses its side anchor while the
+     kanji keeps its own. */
+  /* Centred with auto margins, NOT translate. `translate` (like
+     `transform`) creates a stacking context, which would trap the
+     z-index: 7 on .finale-rise__text / __kanji inside this item — and
+     the item has no z-index of its own, so the whole caption would
+     paint behind .finale__canvas (z-index 6) and be invisible over the
+     finale video. Desktop has no translate here, which is why this only
+     ever showed up on phones. Do not reintroduce one. */
+  .finale-rise__item {
+    left: 0 !important;
+    right: 0 !important;
+    margin-inline: auto;
+    top: calc(50% + var(--rise-top-m, 0px));
+    text-align: center;
+    width: var(--text-width-m, 92vw);
+    max-width: calc(100vw - 2.4rem);
+  }
+  .finale-rise__item .finale-caption__eyebrow {
+    font-size: var(--eyebrow-size-m, min(5.97vw, 1.5rem));
+  }
+  .finale-rise__item .finale-caption__title {
+    font-size: var(--title-size-m, min(15.92vw, 4rem));
+    /* Figma's own shadow on the phone frames — 64px white over a bright
+       video needs it to stay legible. */
+    text-shadow: 14px 0 35.6px #000;
+  }
+  .finale-rise__kanji {
+    top: var(--kanji-y-m, 0px);
+    font-size: var(--kanji-size-m, min(59.7vw, 240px));
+  }
+  .finale-rise__item--left .finale-rise__kanji {
+    left: var(--kanji-x-m);
+  }
+  .finale-rise__item--right .finale-rise__kanji {
+    right: var(--kanji-x-m);
+  }
+}
 @media (prefers-reduced-motion: reduce) {
   .title-card {
     display: none;
   }
   .finale__canvas {
     display: none;
+  }
+  .finale-caption {
+    display: none;
+  }
+  .finale-ink {
+    display: none;
+  }
+  .finale-reveal {
+    display: none;
+  }
+  /* "rise" is the exception: it still shows a plain timed crossfade in
+     place (see ThresholdScene's MOTION_REDUCED branch), so it isn't
+     hidden here — just pinned to a single centred spot, no travel. */
+  .finale-rise__item {
+    left: 0 !important;
+    right: 0 !important;
+    margin-inline: auto;
+    text-align: center;
   }
 }
 

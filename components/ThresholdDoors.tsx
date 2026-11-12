@@ -62,6 +62,7 @@ export default function ThresholdDoors() {
         height={2560}
         decoding="async"
       />
+      <p className="threshold__loading">Loading</p>
     </div>
   );
 }
